@@ -99,6 +99,8 @@
   }
 
   canvas {
+    width: 100% !important;
+    height: auto !important;
     max-width: 100% !important;
     filter: invert(1) hue-rotate(180deg); /* Adjust dark canvas colors for white page printing */
   }
@@ -108,7 +110,8 @@
     display: block !important;
   }
   
-  .grid-cols-2 {
+  .grid-cols-2,
+  .print\:grid-cols-2 {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 1rem !important;

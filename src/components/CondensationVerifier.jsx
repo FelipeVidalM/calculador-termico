@@ -217,11 +217,11 @@ export default function CondensationVerifier() {
   }, [activeResultTab]);
 
   useEffect(() => {
-    if (activeResultTab === 'graf' && results.base && results.proj) {
+    if (results.base && results.proj) {
       drawTChart();
       drawPChart();
     }
-  }, [activeResultTab, results, chartWidth]);
+  }, [results, chartWidth]);
 
   const drawTChart = () => {
     const cv = tempCanvasRef.current;
@@ -229,22 +229,25 @@ export default function CondensationVerifier() {
     const H = 210;
     const dpr = window.devicePixelRatio || 1;
     
+    // Fallback if chartWidth is not computed or 0 (e.g. hidden tab)
+    const activeWidth = chartWidth > 150 ? chartWidth : 600;
+    
     // Set display size and scale canvas internal resolution
-    cv.width = chartWidth * dpr;
+    cv.width = activeWidth * dpr;
     cv.height = H * dpr;
     
     const ctx = cv.getContext('2d');
     ctx.scale(dpr, dpr);
-    ctx.clearRect(0, 0, chartWidth, H);
+    ctx.clearRect(0, 0, activeWidth, H);
 
     // Render dark background so it prints perfectly in PDFs too
     ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, 0, chartWidth, H);
+    ctx.fillRect(0, 0, activeWidth, H);
 
     const B = results.base;
     const P = results.proj;
     const pad = { l: 50, r: 20, t: 20, b: 30 };
-    const pw = chartWidth - pad.l - pad.r;
+    const pw = activeWidth - pad.l - pad.r;
     const ph = H - pad.t - pad.b;
 
     const allT = [
@@ -362,21 +365,24 @@ export default function CondensationVerifier() {
     const H = 210;
     const dpr = window.devicePixelRatio || 1;
     
-    cv.width = chartWidth * dpr;
+    // Fallback if chartWidth is not computed or 0 (e.g. hidden tab)
+    const activeWidth = chartWidth > 150 ? chartWidth : 600;
+    
+    cv.width = activeWidth * dpr;
     cv.height = H * dpr;
     
     const ctx = cv.getContext('2d');
     ctx.scale(dpr, dpr);
-    ctx.clearRect(0, 0, chartWidth, H);
+    ctx.clearRect(0, 0, activeWidth, H);
 
     // Solid dark background for PDF print
     ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0, 0, chartWidth, H);
+    ctx.fillRect(0, 0, activeWidth, H);
 
     const B = results.base;
     const P = results.proj;
     const pad = { l: 55, r: 20, t: 20, b: 30 };
-    const pw = chartWidth - pad.l - pad.r;
+    const pw = activeWidth - pad.l - pad.r;
     const ph = H - pad.t - pad.b;
 
     const Pe = activeWeatherData.hre * pSat(activeWeatherData.te);
@@ -1324,9 +1330,7 @@ export default function CondensationVerifier() {
               </button>
             </div>
 
-            {/* TAB: SUPERFICIAL */}
-            {(activeResultTab === 'sup' || window.matchMedia('print').matches) && (
-              <div className="space-y-6 print:block">
+            <div className={activeResultTab === 'sup' ? "space-y-6 block" : "space-y-6 hidden print:block"}>
                 <div className="glass p-6 rounded-3xl border border-white/5 space-y-4">
                   <h3 className="text-sm font-bold text-white">Evaluación de Riesgo de Condensación Superficial</h3>
                   <p className="text-xs text-gray-400 leading-relaxed print:hidden">
@@ -1424,12 +1428,9 @@ export default function CondensationVerifier() {
                     </table>
                   </div>
                 </div>
-              </div>
-            )}
+            </div>
 
-            {/* TAB: INTERSTICIAL */}
-            {(activeResultTab === 'int' || window.matchMedia('print').matches) && (
-              <div className="space-y-6 print:block">
+            <div className={activeResultTab === 'int' ? "space-y-6 block" : "space-y-6 hidden print:block"}>
                 <div className="glass p-6 rounded-3xl border border-white/5 space-y-4">
                   <h3 className="text-sm font-bold text-white">Evaluación de Riesgo de Condensación Intersticial</h3>
                   <p className="text-xs text-gray-400 leading-relaxed print:hidden">
@@ -1526,12 +1527,9 @@ export default function CondensationVerifier() {
                     </table>
                   </div>
                 </div>
-              </div>
-            )}
+            </div>
 
-            {/* TAB: GRAFICOS */}
-            {(activeResultTab === 'graf' || window.matchMedia('print').matches) && (
-              <div ref={chartContainerRef} className="space-y-6 print:block">
+            <div ref={chartContainerRef} className={activeResultTab === 'graf' ? "space-y-6 block" : "space-y-6 hidden print:block"}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 print:grid-cols-2">
                   
                   {/* Temp Gradient */}
@@ -1587,12 +1585,9 @@ export default function CondensationVerifier() {
                   </div>
 
                 </div>
-              </div>
-            )}
+            </div>
 
-            {/* TAB: CONCLUSIONES */}
-            {(activeResultTab === 'conc' || window.matchMedia('print').matches) && (
-              <div className="space-y-6 print:block">
+            <div className={activeResultTab === 'conc' ? "space-y-6 block" : "space-y-6 hidden print:block"}>
                 
                 {/* Conclusiones boxes */}
                 <div className="space-y-4">
@@ -1792,8 +1787,7 @@ export default function CondensationVerifier() {
                     Exportar Datos JSON
                   </button>
                 </div>
-              </div>
-            )}
+            </div>
 
             <div className="flex justify-between print:hidden">
               <button
