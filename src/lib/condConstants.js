@@ -417,3 +417,38 @@ export const REGIONES_CHILE = {
   }
 };
 
+export const COMUNAS_CON_ALTITUD = [
+  // RM
+  "San José de Maipo", "Lo Barnechea", "Las Condes", "Vitacura", "Peñalolén", "La Florida", "Puente Alto", "Pirque", "Colina", "Til Til",
+  // Arica y Parinacota
+  "Putre", "General Lagos", "Camarones",
+  // Tarapacá
+  "Camiña", "Colchane", "Pica", "Pozo Almonte", "Huara",
+  // Antofagasta
+  "Ollagüe", "San Pedro de Atacama", "Calama", "María Elena",
+  // Atacama
+  "Diego de Almagro", "Alto del Carmen", "Tierra Amarilla", "Copiapó", "Vallenar",
+  // Coquimbo
+  "Vicuña", "Paiguano", "Monte Patria", "Illapel", "Salamanca", "Combarbalá", "Río Hurtado",
+  // Valparaíso
+  "Los Andes", "San Esteban", "Calle Larga", "Rinconada", "Putaendo", "Petorca", "Cabildo",
+  // O'Higgins
+  "Machalí", "Codegua", "Requínoa", "Rengo", "San Fernando", "Chimbarongo", "Mostazal",
+  // Maule
+  "Romeral", "Molina", "San Clemente", "Colbún", "Linares", "Longaví", "Parral",
+  // Ñuble
+  "Pinto", "Coihueco", "San Fabián", "Yungay", "El Carmen", "Pemuco",
+  // Biobío
+  "Antuco", "Santa Bárbara", "Quilleco", "Tucapel", "Alto Biobío", "Mulchén",
+  // Araucanía
+  "Curacautín", "Lonquimay", "Vilcún", "Melipeuco", "Cunco", "Pucón", "Curarrehue", "Villarrica", "Lautaro",
+  // Los Ríos
+  "Panguipulli", "Futrono", "Lago Ranco", "Río Bueno",
+  // Los Lagos
+  "Puerto Varas", "Cochamó", "Chaitén", "Futaleufú", "Palena", "Puyehue",
+  // Aysén
+  "Coyhaique", "Lago Verde", "Chile Chico", "Río Ibáñez", "Cochrane", "O'Higgins", "Tortel",
+  // Magallanes
+  "Torres del Paine", "San Gregorio"
+];
+

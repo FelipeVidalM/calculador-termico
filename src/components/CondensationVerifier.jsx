@@ -16,7 +16,7 @@ import {
   HelpCircle,
   X
 } from 'lucide-react';
-import { BIBLIOTECA, DATOS_CLIMA, PZ, RSI, RSE, delta0, REGIONES_CHILE } from '../lib/condConstants';
+import { BIBLIOTECA, DATOS_CLIMA, PZ, RSI, RSE, delta0, REGIONES_CHILE, COMUNAS_CON_ALTITUD } from '../lib/condConstants';
 import { pSat, Tdew, calcCase, matR, matSd, matMuDisp } from '../lib/condPhysics';
 import InputGroup from './InputGroup';
 
@@ -52,6 +52,16 @@ export default function CondensationVerifier() {
     comuna: 'Santiago',
     altitud: 'bajo' // 'bajo' (<1000m) o 'alto' (>=1000m)
   });
+
+  const hasAltitudeOption = useMemo(() => {
+    return COMUNAS_CON_ALTITUD.includes(climate.comuna);
+  }, [climate.comuna]);
+
+  useEffect(() => {
+    if (!hasAltitudeOption && climate.altitud !== 'bajo') {
+      setClimate(prev => ({ ...prev, altitud: 'bajo' }));
+    }
+  }, [climate.comuna, hasAltitudeOption, climate.altitud]);
 
   const activeZonaTermica = useMemo(() => {
     if (climate.altitud === 'alto') {
@@ -855,22 +865,24 @@ export default function CondensationVerifier() {
                     ))}
                   </select>
                 </div>
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Altitud (MSNM)</label>
-                  <select
-                    value={climate.altitud}
-                    onChange={(e) => {
-                      setClimate({
-                        ...climate,
-                        altitud: e.target.value
-                      });
-                    }}
-                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer text-xs"
-                  >
-                    <option value="bajo" className="bg-slate-900">Baja / Valle (&lt; 1.000m)</option>
-                    <option value="alto" className="bg-slate-900">Alta / Precordillera (&gt;= 1.000m)</option>
-                  </select>
-                </div>
+                {hasAltitudeOption && (
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Altitud (MSNM)</label>
+                    <select
+                      value={climate.altitud}
+                      onChange={(e) => {
+                        setClimate({
+                          ...climate,
+                          altitud: e.target.value
+                        });
+                      }}
+                      className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer text-xs"
+                    >
+                      <option value="bajo" className="bg-slate-900">Baja / Valle (&lt; 1.000m)</option>
+                      <option value="alto" className="bg-slate-900">Alta / Precordillera (&gt;= 1.000m)</option>
+                    </select>
+                  </div>
+                )}
               </div>
 
               {/* Zona térmica visual badge & description */}
