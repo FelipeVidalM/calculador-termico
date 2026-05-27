@@ -267,3 +267,153 @@ export const PZ = {
 export const RSI = { H: 0.13, U: 0.10, D: 0.17 };
 export const RSE = 0.04;
 export const delta0 = 2e-10;
+
+export const REGIONES_CHILE = {
+  "Región de Arica y Parinacota": {
+    provincias: {
+      "Provincia de Arica": ["Arica", "Camarones"],
+      "Provincia de Parinacota": ["Putre", "General Lagos"]
+    }
+  },
+  "Región de Tarapacá": {
+    provincias: {
+      "Provincia de Iquique": ["Iquique", "Alto Hospicio"],
+      "Provincia de Tamarugal": ["Pozo Almonte", "Camiña", "Colchane", "Huara", "Pica"]
+    }
+  },
+  "Región de Antofagasta": {
+    provincias: {
+      "Provincia de Antofagasta": ["Antofagasta", "Mejillones", "Sierra Gorda", "Taltal"],
+      "Provincia del Loa": ["Calama", "Ollagüe", "San Pedro de Atacama"],
+      "Provincia de Tocopilla": ["Tocopilla", "María Elena"]
+    }
+  },
+  "Región de Atacama": {
+    provincias: {
+      "Provincia de Copiapó": ["Copiapó", "Caldera", "Tierra Amarilla"],
+      "Provincia de Chañaral": ["Chañaral", "Diego de Almagro"],
+      "Provincia de Huasco": ["Vallenar", "Alto del Carmen", "Freirina", "Huasco"]
+    }
+  },
+  "Región de Coquimbo": {
+    provincias: {
+      "Provincia de Elqui": ["La Serena", "Coquimbo", "Andacollo", "La Higuera", "Paihuano", "Vicuña"],
+      "Provincia de Limarí": ["Ovalle", "Combarbalá", "Monte Patria", "Punitaqui", "Río Hurtado"],
+      "Provincia de Choapa": ["Illapel", "Canela", "Los Vilos", "Salamanca"]
+    }
+  },
+  "Región de Valparaíso": {
+    provincias: {
+      "Provincia de Valparaíso": ["Valparaíso", "Casablanca", "Concón", "Puchuncaví", "Quintero", "Viña del Mar"],
+      "Provincia de Isla de Pascua": ["Isla de Pascua"],
+      "Provincia de Los Andes": ["Los Andes", "Calle Larga", "Rinconada", "San Esteban"],
+      "Provincia de Petorca": ["La Ligua", "Cabildo", "Papudo", "Petorca", "Zapallar"],
+      "Provincia de Quillota": ["Quillota", "La Cruz", "Nogales", "Hijuelas"],
+      "Provincia de San Antonio": ["San Antonio", "Algarrrobo", "El Quisco", "El Tabo", "Cartagena", "Santo Domingo"],
+      "Provincia de San Felipe": ["San Felipe", "Catemu", "Llaillay", "Panquehue", "Putaendo", "Santa María"],
+      "Provincia de Marga-Marga": ["Quilpué", "Limache", "Olmué", "Villa Alemana"]
+    }
+  },
+  "Región Metropolitana de Santiago": {
+    provincias: {
+      "Provincia de Santiago": [
+        "Santiago", "Cerrillos", "Cerro Navia", "Conchalí", "El Bosque", "Estación Central", 
+        "Huechuraba", "Independencia", "La Cisterna", "La Florida", "La Granja", "La Pintana", 
+        "La Reina", "Las Condes", "Lo Barnechea", "Lo Espejo", "Lo Prado", "Macul", "Maipú", 
+        "Ñuñoa", "Pedro Aguirre Cerda", "Peñalolén", "Providencia", "Pudahuel", "Quilicura", 
+        "Quinta Normal", "Recoleta", "Renca", "San Joaquín", "San Miguel", "San Ramón", "Vitacura"
+      ],
+      "Provincia de Chacabuco": ["Colina", "Lampa", "Til Til"],
+      "Provincia de Cordillera": ["Puente Alto", "Pirque", "San José de Maipo"],
+      "Provincia de Maipo": ["San Bernardo", "Buin", "Calera de Tango", "Paine"],
+      "Provincia de Melipilla": ["Melipilla", "Alhué", "Curacaví", "María Pinto", "San Pedro"],
+      "Provincia de Talagante": ["Talagante", "El Monte", "Isla de Maipo", "Padre Hurtado", "Peñaflor"]
+    }
+  },
+  "Región del Libertador General Bernardo O'Higgins": {
+    provincias: {
+      "Provincia de Cachapoal": [
+        "Rancagua", "Codegua", "Coinco", "Coltauco", "Doñihue", "Graneros", "Las Cabras", 
+        "Machalí", "Malloa", "Mostazal", "Olivar", "Peumo", "Pichidegua", "Quinta de Tilcoco", 
+        "Rengo", "Requínoa", "San Vicente"
+      ],
+      "Provincia de Colchagua": [
+        "San Fernando", "Chépica", "Chimbarongo", "Lolol", "Nancagua", "Palmilla", 
+        "Peralillo", "Placilla", "Pumanque", "Santa Cruz"
+      ],
+      "Provincia de Cardenal Caro": ["Pichilemu", "La Estrella", "Litueche", "Marchihue", "Navidad", "Paredones"]
+    }
+  },
+  "Región del Maule": {
+    provincias: {
+      "Provincia de Talca": ["Talca", "Constitución", "Curepto", "Empedrado", "Maule", "Pelarco", "Pencahue", "Río Claro", "San Clemente", "San Rafael"],
+      "Provincia de Curicó": ["Curicó", "Hualañé", "Licantén", "Molina", "Rauco", "Romeral", "Sagrada Familia", "Teno", "Vichuquén"],
+      "Provincia de Linares": ["Linares", "Colbún", "Longaví", "Parral", "Retiro", "San Javier", "Villa Alegre", "Yerbas Buenas"],
+      "Provincia de Cauquenes": ["Cauquenes", "Chanco", "Pelluhue"]
+    }
+  },
+  "Región de Ñuble": {
+    provincias: {
+      "Provincia de Diguillín": ["Chillán", "Bulnes", "Chillán Viejo", "El Carmen", "Pemuco", "Pinto", "Quillón", "San Ignacio", "Yungay"],
+      "Provincia de Itata": ["Quirihue", "Cobquecura", "Coelemu", "Ninhue", "Portezuelo", "Ránquil", "Treguaco"],
+      "Provincia de Punilla": ["San Carlos", "Coihueco", "Ñiquén", "San Fabián", "San Nicolás"]
+    }
+  },
+  "Región del Biobío": {
+    provincias: {
+      "Provincia de Concepción": [
+        "Concepción", "Coronel", "Chiguayante", "Florida", "Hualpén", "Laja", "Penco", 
+        "San Pedro de la Paz", "Santa Juana", "Talcahuano", "Tomé", "Hualqui"
+      ],
+      "Provincia de Biobío": [
+        "Los Ángeles", "Antuco", "Cabrero", "Mulchén", "Nacimiento", "Negrete", 
+        "Quilaco", "Quilleco", "San Rosendo", "Santa Bárbara", "Tucapel", "Yumbel", "Alto Biobío"
+      ],
+      "Provincia de Arauco": ["Lebu", "Arauco", "Cañete", "Contulmo", "Curanilahue", "Los Álamos", "Tirúa"]
+    }
+  },
+  "Región de La Araucanía": {
+    provincias: {
+      "Provincia de Cautín": [
+        "Temuco", "Carahue", "Cunco", "Curarrehue", "Freire", "Galvarino", "Gorbea", 
+        "Lautaro", "Loncoche", "Melipeuco", "Nueva Imperial", "Padre Las Casas", "Perquenco", 
+        "Pitrufquén", "Pucón", "Saavedra", "Teodoro Schmidt", "Toltén", "Vilcún", "Villarrica", "Cholchol"
+      ],
+      "Provincia de Malleco": [
+        "Angol", "Collipulli", "Curacautín", "Ercilla", "Lonquimay", "Los Sauces", 
+        "Lumaco", "Purén", "Renaico", "Traiguén", "Victoria"
+      ]
+    }
+  },
+  "Región de Los Ríos": {
+    provincias: {
+      "Provincia de Valdivia": ["Valdivia", "Corral", "Lanco", "Los Lagos", "Máfil", "Mariquina", "Paillaco", "Panguipulli"],
+      "Provincia del Ranco": ["La Unión", "Futrono", "Lago Ranco", "Río Bueno"]
+    }
+  },
+  "Región de Los Lagos": {
+    provincias: {
+      "Provincia de Llanquihue": ["Puerto Montt", "Calbuco", "Cochamó", "Fresia", "Frutillar", "Los Muermos", "Llanquihue", "Maullín", "Puerto Varas"],
+      "Provincia de Chiloé": ["Castro", "Ancud", "Chonchi", "Curaco de Vélez", "Dalcahue", "Puqueldón", "Queilén", "Quellón", "Quemchi", "Quinchao"],
+      "Provincia de Osorno": ["Osorno", "Puerto Octay", "Purranque", "Puyehue", "Río Negro", "San Juan de la Costa", "San Pablo"],
+      "Provincia de Palena": ["Chaitén", "Futaleufú", "Hualaihué", "Palena"]
+    }
+  },
+  "Región de Aysén del General Carlos Ibáñez del Campo": {
+    provincias: {
+      "Provincia de Coyhaique": ["Coyhaique", "Lago Verde"],
+      "Provincia de Aysén": ["Aysén", "Cisnes", "Guaitecas"],
+      "Provincia de General Carrera": ["Chile Chico", "Río Ibáñez"],
+      "Provincia de Capitán Prat": ["Cochrane", "O'Higgins", "Tortel"]
+    }
+  },
+  "Región de Magallanes y de la Antártica Chilena": {
+    provincias: {
+      "Provincia de Magallanes": ["Punta Arenas", "Laguna Blanca", "Río Verde", "San Gregorio"],
+      "Provincia de Última Esperanza": ["Natales", "Torres del Paine"],
+      "Provincia de Tierra del Fuego": ["Porvenir", "Primavera", "Timaukel"],
+      "Provincia de la Antártica Chilena": ["Cabo de Hornos", "Antártica"]
+    }
+  }
+};
+

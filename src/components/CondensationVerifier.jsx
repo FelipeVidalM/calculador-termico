@@ -16,7 +16,7 @@ import {
   HelpCircle,
   X
 } from 'lucide-react';
-import { BIBLIOTECA, DATOS_CLIMA, PZ, RSI, RSE, delta0 } from '../lib/condConstants';
+import { BIBLIOTECA, DATOS_CLIMA, PZ, RSI, RSE, delta0, REGIONES_CHILE } from '../lib/condConstants';
 import { pSat, Tdew, calcCase, matR, matSd, matMuDisp } from '../lib/condPhysics';
 import InputGroup from './InputGroup';
 
@@ -35,7 +35,7 @@ export default function CondensationVerifier() {
     owner: '',
     prof: '',
     address: '',
-    commune: '',
+    commune: 'Santiago',
     rut: '',
     fecha: new Date().toISOString().split('T')[0],
     pda: '',
@@ -45,11 +45,21 @@ export default function CondensationVerifier() {
     mobiliario: '2' // Rsi + 0.02
   });
 
-  // Step 1: Climate State
+  // Step 1: Climate State (3-level selector: Region -> Provincia -> Comuna)
   const [climate, setClimate] = useState({
-    zonaTermica: 'D',
-    provincia: 'Provincia de Santiago'
+    region: 'Región Metropolitana de Santiago',
+    provincia: 'Provincia de Santiago',
+    comuna: 'Santiago'
   });
+
+  const activeZonaTermica = useMemo(() => {
+    for (const [zona, provincias] of Object.entries(PZ)) {
+      if (provincias.includes(climate.provincia)) {
+        return zona;
+      }
+    }
+    return 'D';
+  }, [climate.provincia]);
 
   const activeWeatherData = useMemo(() => {
     return DATOS_CLIMA[climate.provincia] || { te: 2.2, hre: 0.92 };
@@ -492,15 +502,7 @@ export default function CondensationVerifier() {
     setLayersProj(layersProj.filter(l => l.mi !== globalIdxToRemove));
   };
 
-  // Province loading according to zone
-  const handleZoneChange = (e) => {
-    const zone = e.target.value;
-    const provinces = PZ[zone] || [];
-    setClimate({
-      zonaTermica: zone,
-      provincia: provinces[0] || ''
-    });
-  };
+  // exportData utility for project state
 
   const exportData = () => {
     const data = {
@@ -699,16 +701,27 @@ export default function CondensationVerifier() {
                 Condiciones Climáticas Exteriores
               </h2>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Zona Térmica (Reglamentación)</label>
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Región</label>
                   <select
-                    value={climate.zonaTermica}
-                    onChange={handleZoneChange}
-                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer"
+                    value={climate.region}
+                    onChange={(e) => {
+                      const reg = e.target.value;
+                      const provs = REGIONES_CHILE[reg]?.provincias || {};
+                      const firstProv = Object.keys(provs)[0] || '';
+                      const firstCom = provs[firstProv]?.[0] || '';
+                      setClimate({
+                        region: reg,
+                        provincia: firstProv,
+                        comuna: firstCom
+                      });
+                      setProjectInfo(prev => ({ ...prev, commune: firstCom }));
+                    }}
+                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer text-xs"
                   >
-                    {Object.keys(PZ).map(z => (
-                      <option key={z} value={z} className="bg-slate-900">Zona Térmica {z}</option>
+                    {Object.keys(REGIONES_CHILE).map(r => (
+                      <option key={r} value={r} className="bg-slate-900">{r}</option>
                     ))}
                   </select>
                 </div>
@@ -716,11 +729,45 @@ export default function CondensationVerifier() {
                   <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Provincia</label>
                   <select
                     value={climate.provincia}
-                    onChange={(e) => setClimate({ ...climate, provincia: e.target.value })}
-                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer"
+                    onChange={(e) => {
+                      const prov = e.target.value;
+                      const coms = REGIONES_CHILE[climate.region]?.provincias[prov] || [];
+                      const firstCom = coms[0] || '';
+                      setClimate({
+                        ...climate,
+                        provincia: prov,
+                        comuna: firstCom
+                      });
+                      setProjectInfo(prev => ({ ...prev, commune: firstCom }));
+                    }}
+                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer text-xs"
+                    disabled={!climate.region}
                   >
-                    {(PZ[climate.zonaTermica] || []).map(p => (
+                    {Object.keys(REGIONES_CHILE[climate.region]?.provincias || {}).map(p => (
                       <option key={p} value={p} className="bg-slate-900">{p}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Comuna</label>
+                  <select
+                    value={climate.comuna}
+                    onChange={(e) => {
+                      const com = e.target.value;
+                      setClimate({
+                        ...climate,
+                        comuna: com
+                      });
+                      setProjectInfo(prev => ({
+                        ...prev,
+                        commune: com
+                      }));
+                    }}
+                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer text-xs"
+                    disabled={!climate.provincia}
+                  >
+                    {(REGIONES_CHILE[climate.region]?.provincias[climate.provincia] || []).map(c => (
+                      <option key={c} value={c} className="bg-slate-900">{c}</option>
                     ))}
                   </select>
                 </div>
@@ -758,7 +805,7 @@ export default function CondensationVerifier() {
                     G: 'Sur y lagos. Alta precipitación anual, clima frío y húmedo con altos requerimientos térmicos.',
                     H: 'Patagonia norte. Inviernos de frío extremo con heladas severas y nieve habitual.',
                     I: 'Zona austral extrema. Condiciones extremas de congelamiento continuo y vientos de alta velocidad.'
-                  }[climate.zonaTermica]
+                  }[activeZonaTermica]
                 }
               </div>
             </div>
@@ -1611,7 +1658,8 @@ export default function CondensationVerifier() {
                   <h3 className="text-sm font-bold text-white mb-3">Parámetros Ambientales del Reporte</h3>
                   <table className="w-full text-xs text-gray-300">
                     <tbody>
-                      <tr className="border-b border-white/5"><td className="py-2">Clima de Provincia</td><td className="py-2 text-right">{climate.provincia} (Zona {climate.zonaTermica})</td></tr>
+                      <tr className="border-b border-white/5"><td className="py-2">Comuna / Localidad</td><td className="py-2 text-right">{climate.comuna} ({climate.provincia}, {climate.region})</td></tr>
+                      <tr className="border-b border-white/5"><td className="py-2">Zona Térmica NCh1079</td><td className="py-2 text-right">Zona {activeZonaTermica}</td></tr>
                       <tr className="border-b border-white/5"><td className="py-2">Temperatura exterior de Julio</td><td className="py-2 text-right">{activeWeatherData.te.toFixed(1)} °C</td></tr>
                       <tr className="border-b border-white/5"><td className="py-2">Humedad relativa exterior</td><td className="py-2 text-right">{Math.round(activeWeatherData.hre * 100)} %</td></tr>
                       <tr className="border-b border-white/5"><td className="py-2">Temperatura interior fijada</td><td className="py-2 text-right">19.0 °C</td></tr>
