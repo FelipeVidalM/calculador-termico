@@ -227,14 +227,23 @@ export default function CondensationVerifier() {
     const cv = tempCanvasRef.current;
     if (!cv) return;
     const H = 210;
-    cv.width = chartWidth;
-    cv.height = H;
+    const dpr = window.devicePixelRatio || 1;
+    
+    // Set display size and scale canvas internal resolution
+    cv.width = chartWidth * dpr;
+    cv.height = H * dpr;
+    
     const ctx = cv.getContext('2d');
+    ctx.scale(dpr, dpr);
     ctx.clearRect(0, 0, chartWidth, H);
+
+    // Render dark background so it prints perfectly in PDFs too
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, chartWidth, H);
 
     const B = results.base;
     const P = results.proj;
-    const pad = { l: 45, r: 15, t: 15, b: 25 };
+    const pad = { l: 50, r: 20, t: 20, b: 30 };
     const pw = chartWidth - pad.l - pad.r;
     const ph = H - pad.t - pad.b;
 
@@ -251,31 +260,31 @@ export default function CondensationVerifier() {
     const xp = (i, n) => pad.l + (i / (n - 1)) * pw;
     const yp = (T) => pad.t + ph - ((T - mn) / (mx - mn)) * ph;
 
-    // Grid lines
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    // Grid lines and Y axis
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
     ctx.lineWidth = 1;
     for (let g = 0; g <= 4; g++) {
-      const y = pad.t + g * (ph / 4);
+      const y = yp(mn + g * (mx - mn) / 4);
       ctx.beginPath();
       ctx.moveTo(pad.l, y);
       ctx.lineTo(pad.l + pw, y);
       ctx.stroke();
 
-      const T = mx - g * (mx - mn) / 4;
+      const T = mn + g * (mx - mn) / 4;
       ctx.fillStyle = '#94a3b8';
-      ctx.font = '10px monospace';
+      ctx.font = 'bold 10px monospace';
       ctx.textAlign = 'right';
-      ctx.fillText(T.toFixed(0) + '°C', pad.l - 6, y + 3);
+      ctx.fillText(T.toFixed(0) + '°C', pad.l - 8, y + 3);
     }
 
     // Dew point lines
     [0.65, 0.75, 0.80].forEach((phi, idx) => {
       const Td = Tdew(19, phi);
-      const cols = ['rgba(239, 68, 68, 0.7)', 'rgba(245, 158, 11, 0.7)', 'rgba(220, 38, 38, 0.8)'];
+      const cols = ['rgba(249, 115, 22, 0.85)', 'rgba(244, 63, 94, 0.85)', 'rgba(239, 68, 68, 0.95)'];
       const y = yp(Td);
       ctx.strokeStyle = cols[idx];
       ctx.setLineDash([4, 4]);
-      ctx.lineWidth = 1;
+      ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.moveTo(pad.l, y);
       ctx.lineTo(pad.l + pw, y);
@@ -283,14 +292,14 @@ export default function CondensationVerifier() {
       ctx.setLineDash([]);
 
       ctx.fillStyle = cols[idx];
-      ctx.font = '9px sans-serif';
+      ctx.font = 'bold 9px sans-serif';
       ctx.textAlign = 'left';
-      ctx.fillText(`Td ${Math.round(phi * 100)}%=${Td.toFixed(1)}°`, pad.l + 6, y - 4);
+      ctx.fillText(`Td ${Math.round(phi * 100)}% = ${Td.toFixed(1)}°C`, pad.l + 8, y - 4);
     });
 
     // Base solution plot (Blue)
     ctx.strokeStyle = '#3b82f6';
-    ctx.lineWidth = 2.5;
+    ctx.lineWidth = 3;
     ctx.beginPath();
     B.pts.forEach((pt, i) => {
       const x = xp(i, B.pts.length);
@@ -300,9 +309,22 @@ export default function CondensationVerifier() {
     });
     ctx.stroke();
 
+    // Node circles for Base case
+    B.pts.forEach((pt, i) => {
+      const x = xp(i, B.pts.length);
+      const y = yp(pt.T);
+      ctx.fillStyle = '#3b82f6';
+      ctx.beginPath();
+      ctx.arc(x, y, 4, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    });
+
     // Projected solution plot (Green)
     ctx.strokeStyle = '#10b981';
-    ctx.lineWidth = 2.5;
+    ctx.lineWidth = 3;
     ctx.beginPath();
     P.pts.forEach((pt, i) => {
       const x = xp(i, P.pts.length);
@@ -312,26 +334,48 @@ export default function CondensationVerifier() {
     });
     ctx.stroke();
 
+    // Node circles for Projected case
+    P.pts.forEach((pt, i) => {
+      const x = xp(i, P.pts.length);
+      const y = yp(pt.T);
+      ctx.fillStyle = '#10b981';
+      ctx.beginPath();
+      ctx.arc(x, y, 4, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    });
+
     // Axis labels
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '10px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('EXTERIOR', pad.l + 4, H - 6);
-    ctx.fillText('INTERIOR', pad.l + pw - 4, H - 6);
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = 'bold 9px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('◀ EXTERIOR', pad.l + 4, H - 8);
+    ctx.textAlign = 'right';
+    ctx.fillText('INTERIOR ▶', pad.l + pw - 4, H - 8);
   };
 
   const drawPChart = () => {
     const cv = pressCanvasRef.current;
     if (!cv) return;
     const H = 210;
-    cv.width = chartWidth;
-    cv.height = H;
+    const dpr = window.devicePixelRatio || 1;
+    
+    cv.width = chartWidth * dpr;
+    cv.height = H * dpr;
+    
     const ctx = cv.getContext('2d');
+    ctx.scale(dpr, dpr);
     ctx.clearRect(0, 0, chartWidth, H);
+
+    // Solid dark background for PDF print
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, chartWidth, H);
 
     const B = results.base;
     const P = results.proj;
-    const pad = { l: 50, r: 15, t: 15, b: 25 };
+    const pad = { l: 55, r: 20, t: 20, b: 30 };
     const pw = chartWidth - pad.l - pad.r;
     const ph = H - pad.t - pad.b;
 
@@ -351,26 +395,26 @@ export default function CondensationVerifier() {
     const xp = (i, n) => pad.l + (i / (n - 1)) * pw;
     const yp = (Pv) => pad.t + ph - ((Pv - mn) / (mx - mn)) * ph;
 
-    // Grid lines
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    // Grid lines and Y axis
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
     ctx.lineWidth = 1;
     for (let g = 0; g <= 4; g++) {
-      const y = pad.t + g * (ph / 4);
+      const y = yp(mn + g * (mx - mn) / 4);
       ctx.beginPath();
       ctx.moveTo(pad.l, y);
       ctx.lineTo(pad.l + pw, y);
       ctx.stroke();
 
-      const PVal = mx - g * (mx - mn) / 4;
+      const PVal = mn + g * (mx - mn) / 4;
       ctx.fillStyle = '#94a3b8';
-      ctx.font = '10px monospace';
+      ctx.font = 'bold 9px monospace';
       ctx.textAlign = 'right';
-      ctx.fillText(Math.round(PVal) + ' Pa', pad.l - 6, y + 3);
+      ctx.fillText(Math.round(PVal) + ' Pa', pad.l - 8, y + 3);
     }
 
     // Psat Base (Blue)
-    ctx.strokeStyle = 'rgba(59, 130, 246, 0.4)';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(59, 130, 246, 0.5)';
+    ctx.lineWidth = 2.5;
     ctx.beginPath();
     bPsat.forEach((v, i) => {
       const x = xp(i, B.pts.length);
@@ -380,9 +424,19 @@ export default function CondensationVerifier() {
     });
     ctx.stroke();
 
+    // Node circles for Psat Base
+    bPsat.forEach((v, i) => {
+      const x = xp(i, B.pts.length);
+      const y = yp(v);
+      ctx.fillStyle = '#3b82f6';
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, 2 * Math.PI);
+      ctx.fill();
+    });
+
     // Psat Proyectado (Green)
-    ctx.strokeStyle = 'rgba(16, 185, 129, 0.4)';
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(16, 185, 129, 0.5)';
+    ctx.lineWidth = 2.5;
     ctx.beginPath();
     pPsat.forEach((v, i) => {
       const x = xp(i, P.pts.length);
@@ -392,12 +446,22 @@ export default function CondensationVerifier() {
     });
     ctx.stroke();
 
+    // Node circles for Psat Proyectado
+    pPsat.forEach((v, i) => {
+      const x = xp(i, P.pts.length);
+      const y = yp(v);
+      ctx.fillStyle = '#10b981';
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, 2 * Math.PI);
+      ctx.fill();
+    });
+
     // Vapor pressure profiles at HR 65%, 75%, 80% (dotted reds)
-    [[0.65, 'rgba(239, 68, 68, 0.8)'], [0.75, 'rgba(245, 158, 11, 0.8)'], [0.80, 'rgba(220, 38, 38, 0.9)']].forEach(([phi, col]) => {
+    [[0.65, 'rgba(249, 115, 22, 0.95)'], [0.75, 'rgba(244, 63, 94, 0.95)'], [0.80, 'rgba(239, 68, 68, 0.95)']].forEach(([phi, col]) => {
       const pv = pvArr(B.pts, phi);
       ctx.strokeStyle = col;
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([4, 2]);
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 3]);
       ctx.beginPath();
       pv.forEach((v, i) => {
         const x = xp(i, B.pts.length);
@@ -410,11 +474,12 @@ export default function CondensationVerifier() {
     });
 
     // Axis labels
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '10px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('EXTERIOR', pad.l + 4, H - 6);
-    ctx.fillText('INTERIOR', pad.l + pw - 4, H - 6);
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = 'bold 9px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('◀ EXTERIOR', pad.l + 4, H - 8);
+    ctx.textAlign = 'right';
+    ctx.fillText('INTERIOR ▶', pad.l + pw - 4, H - 8);
   };
 
   // Add layer handlers
@@ -1475,8 +1540,8 @@ export default function CondensationVerifier() {
                       <span>Perfil de Gradiente de Temperatura</span>
                       <span className="text-[10px] text-gray-500 uppercase tracking-widest">Exterior → Interior</span>
                     </h3>
-                    <div className="p-2 bg-slate-950/60 border border-white/5 rounded-2xl overflow-hidden relative">
-                      <canvas ref={tempCanvasRef} className="block w-full max-w-full" height={210}></canvas>
+                    <div className="p-2 bg-[#0f172a] border border-white/5 rounded-2xl overflow-hidden relative">
+                      <canvas ref={tempCanvasRef} className="block w-full" style={{ width: '100%', height: '210px' }}></canvas>
                     </div>
                     {/* Legend */}
                     <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-[10px] text-gray-400">
@@ -1501,8 +1566,8 @@ export default function CondensationVerifier() {
                       <span>Presión de Vapor vs Saturación (Glaser)</span>
                       <span className="text-[10px] text-gray-500 uppercase tracking-widest">Exterior → Interior</span>
                     </h3>
-                    <div className="p-2 bg-slate-950/60 border border-white/5 rounded-2xl overflow-hidden">
-                      <canvas ref={pressCanvasRef} className="block w-full max-w-full" height={210}></canvas>
+                    <div className="p-2 bg-[#0f172a] border border-white/5 rounded-2xl overflow-hidden">
+                      <canvas ref={pressCanvasRef} className="block w-full" style={{ width: '100%', height: '210px' }}></canvas>
                     </div>
                     {/* Legend */}
                     <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-[10px] text-gray-400 font-sans">
