@@ -49,21 +49,33 @@ export default function CondensationVerifier() {
   const [climate, setClimate] = useState({
     region: 'Región Metropolitana de Santiago',
     provincia: 'Provincia de Santiago',
-    comuna: 'Santiago'
+    comuna: 'Santiago',
+    altitud: 'bajo' // 'bajo' (<1000m) o 'alto' (>=1000m)
   });
 
   const activeZonaTermica = useMemo(() => {
+    if (climate.altitud === 'alto') {
+      return 'H'; // Precordillera de gran altitud se asocia a Zona H
+    }
     for (const [zona, provincias] of Object.entries(PZ)) {
       if (provincias.includes(climate.provincia)) {
         return zona;
       }
     }
     return 'D';
-  }, [climate.provincia]);
+  }, [climate.provincia, climate.altitud]);
 
   const activeWeatherData = useMemo(() => {
-    return DATOS_CLIMA[climate.provincia] || { te: 2.2, hre: 0.92 };
-  }, [climate.provincia]);
+    const baseWeather = DATOS_CLIMA[climate.provincia] || { te: 2.2, hre: 0.92 };
+    if (climate.altitud === 'alto') {
+      // Disminución de temperatura por gradiente altotérmico de montaña (típicamente -4.0°C)
+      return {
+        te: Math.round((baseWeather.te - 4.0) * 10) / 10,
+        hre: Math.min(1.0, baseWeather.hre + 0.03)
+      };
+    }
+    return baseWeather;
+  }, [climate.provincia, climate.altitud]);
 
   const activeRsi = useMemo(() => {
     const dir = projectInfo.flowDir;
@@ -701,7 +713,7 @@ export default function CondensationVerifier() {
                 Condiciones Climáticas Exteriores
               </h2>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div className="flex flex-col gap-1">
                   <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Región</label>
                   <select
@@ -712,6 +724,7 @@ export default function CondensationVerifier() {
                       const firstProv = Object.keys(provs)[0] || '';
                       const firstCom = provs[firstProv]?.[0] || '';
                       setClimate({
+                        ...climate,
                         region: reg,
                         provincia: firstProv,
                         comuna: firstCom
@@ -771,12 +784,58 @@ export default function CondensationVerifier() {
                     ))}
                   </select>
                 </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Altitud (MSNM)</label>
+                  <select
+                    value={climate.altitud}
+                    onChange={(e) => {
+                      setClimate({
+                        ...climate,
+                        altitud: e.target.value
+                      });
+                    }}
+                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer text-xs"
+                  >
+                    <option value="bajo" className="bg-slate-900">Baja / Valle (&lt; 1.000m)</option>
+                    <option value="alto" className="bg-slate-900">Alta / Precordillera (&gt;= 1.000m)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Zona térmica visual badge & description */}
+              <div className="flex flex-col sm:flex-row items-center gap-6 p-5 bg-white/5 border border-white/5 rounded-2xl">
+                <div className="text-center sm:text-left shrink-0">
+                  <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Zona Térmica NCh1079</div>
+                  <div className="text-6xl font-black text-blue-400 mt-1 flex items-center justify-center sm:justify-start gap-3">
+                    {activeZonaTermica}
+                    {climate.altitud === 'alto' && (
+                      <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-orange-500/20 text-orange-400 font-bold border border-orange-500/10">
+                        ALTITUD
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="text-xs text-gray-400 leading-relaxed border-t sm:border-t-0 sm:border-l border-white/5 pt-4 sm:pt-0 sm:pl-6">
+                  <strong>Descripción Física de la Zona:</strong> {
+                    {
+                      A: 'Norte árido y costero. Inviernos templados con baja humedad relativa y alta radiación. Bajo riesgo de condensación superficial.',
+                      B: 'Norte chico. Clima templado-árido con oscilación térmica diaria considerable en valles interiores.',
+                      C: 'Litoral central. Humedad constante por influencia marina directa, inviernos húmedos y frescos.',
+                      D: 'Santiago y depresión central. Riesgo moderado con bajas temperaturas matinales y alta polución estacional.',
+                      E: 'Central interior y precordillera. Inviernos fríos y húmedos, mayores gradientes de temperatura.',
+                      F: 'Centro-sur lluvioso. Lluvias muy frecuentes, humedad ambiente exterior cercana a saturación en invierno.',
+                      G: 'Sur y lagos. Alta precipitación anual, clima frío y húmedo con altos requerimientos térmicos.',
+                      H: 'Patagonia norte / Altitud Cordillera. Inviernos de frío extremo con heladas severas y nieve habitual.',
+                      I: 'Zona austral extrema. Condiciones extremas de congelamiento continuo y vientos de alta velocidad.'
+                    }[activeZonaTermica]
+                  }
+                </div>
               </div>
 
               {/* Climate stats cards */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="glass p-4 rounded-xl border border-white/5">
-                  <div className="text-[10px] text-gray-500 font-bold uppercase">T° Ext (Julio)</div>
+                  <div className="text-[10px] text-gray-500 font-bold uppercase">T° Ext (Julio) Media Mín</div>
                   <div className="text-2xl font-bold font-mono text-white mt-1">{activeWeatherData.te.toFixed(1)}°C</div>
                 </div>
                 <div className="glass p-4 rounded-xl border border-white/5">
@@ -784,29 +843,13 @@ export default function CondensationVerifier() {
                   <div className="text-2xl font-bold font-mono text-white mt-1">{Math.round(activeWeatherData.hre * 100)}%</div>
                 </div>
                 <div className="glass p-4 rounded-xl border border-white/5">
-                  <div className="text-[10px] text-gray-500 font-bold uppercase">T° Interior</div>
+                  <div className="text-[10px] text-gray-500 font-bold uppercase">T° Interior Fija</div>
                   <div className="text-2xl font-bold font-mono text-white mt-1">19.0°C</div>
                 </div>
                 <div className="glass p-4 rounded-xl border border-white/5">
                   <div className="text-[10px] text-gray-500 font-bold uppercase">Gradiente ΔT</div>
                   <div className="text-2xl font-bold font-mono text-white mt-1">{(19 - activeWeatherData.te).toFixed(1)}°C</div>
                 </div>
-              </div>
-
-              <div className="p-4 bg-slate-900/60 rounded-xl border border-white/5 text-xs text-gray-400">
-                <strong>Descripción de la Zona:</strong> {
-                  {
-                    A: 'Norte árido y costero. Inviernos templados con baja humedad relativa y alta radiación. Bajo riesgo global.',
-                    B: 'Norte chico. Clima templado-árido con oscilación térmica diaria considerable en valles interiores.',
-                    C: 'Litoral central. Humedad constante por influencia marina directa, inviernos húmedos y frescos.',
-                    D: 'Santiago y depresión central. Riesgo moderado con bajas temperaturas matinales y alta polución estacional.',
-                    E: 'Central interior y precordillera. Inviernos fríos y húmedos, mayores gradientes de temperatura.',
-                    F: 'Centro-sur lluvioso. Lluvias muy frecuentes, humedad ambiente exterior cercana a saturación en invierno.',
-                    G: 'Sur y lagos. Alta precipitación anual, clima frío y húmedo con altos requerimientos térmicos.',
-                    H: 'Patagonia norte. Inviernos de frío extremo con heladas severas y nieve habitual.',
-                    I: 'Zona austral extrema. Condiciones extremas de congelamiento continuo y vientos de alta velocidad.'
-                  }[activeZonaTermica]
-                }
               </div>
             </div>
 
