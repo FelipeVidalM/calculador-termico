@@ -1175,7 +1175,7 @@ export default function CondensationVerifier() {
                 <div className="glass p-6 rounded-3xl border border-white/5 space-y-4">
                   <h3 className="text-sm font-bold text-white">Evaluación de Riesgo de Condensación Superficial</h3>
                   <p className="text-xs text-gray-400 leading-relaxed print:hidden">
-                    La condensación superficial ocurre si la temperatura de la cara interior de la pared ($T_{si}$) cae por debajo de la temperatura de rocío del aire interior ($T_d$).
+                    La condensación superficial ocurre si la temperatura de la cara interior de la pared {"($T_{si}$)"} cae por debajo de la temperatura de rocío del aire interior {"($T_d$)"}.
                   </p>
                   
                   <div className="overflow-x-auto">
@@ -1238,7 +1238,7 @@ export default function CondensationVerifier() {
                 </div>
 
                 <div className="glass p-6 rounded-3xl border border-white/5 space-y-4">
-                  <h3 className="text-sm font-bold text-white">Resistencia Térmica Requerida ($R_T$ mín) vs Disponible</h3>
+                  <h3 className="text-sm font-bold text-white">Resistencia Térmica Requerida {"($R_T$ mín)"} vs Disponible</h3>
                   <div className="overflow-x-auto">
                     <table className="w-full text-xs text-left">
                       <thead className="bg-white/5 text-gray-400 uppercase font-bold border-b border-white/5">
@@ -1278,7 +1278,7 @@ export default function CondensationVerifier() {
                 <div className="glass p-6 rounded-3xl border border-white/5 space-y-4">
                   <h3 className="text-sm font-bold text-white">Evaluación de Riesgo de Condensación Intersticial</h3>
                   <p className="text-xs text-gray-400 leading-relaxed print:hidden">
-                    La condensación intersticial ocurre en el interior de la sección si la presión de vapor acumulada ($P_v$) supera la presión de saturación ($P_{sat}$) en cualquier interfaz de capas.
+                    La condensación intersticial ocurre en el interior de la sección si la presión de vapor acumulada {"($P_v$)"} supera la presión de saturación {"($P_{sat}$)"} en cualquier interfaz de capas.
                   </p>
                   
                   <div className="overflow-x-auto">
@@ -1540,7 +1540,7 @@ export default function CondensationVerifier() {
                       </thead>
                       <tbody className="divide-y divide-white/5 text-gray-300 font-mono text-xs">
                         <tr>
-                          <td className="py-3 px-4 font-sans font-semibold text-white">Resistencia Térmica Total ($R_T$)</td>
+                          <td className="py-3 px-4 font-sans font-semibold text-white">Resistencia Térmica Total {"($R_T$)"}</td>
                           <td className="py-3 px-4 text-center">{results.base.RT.toFixed(3)} m²K/W</td>
                           <td className="py-3 px-4 text-center">{results.proj.RT.toFixed(3)} m²K/W</td>
                           <td className="py-3 px-4 text-center font-sans">
@@ -1552,9 +1552,9 @@ export default function CondensationVerifier() {
                           </td>
                         </tr>
                         <tr>
-                          <td className="py-3 px-4 font-sans font-semibold text-white">Transmitancia Térmica ($U$)</td>
-                          <td className="py-3 px-4 text-center">{(1/results.base.RT).toFixed(3)} W/m²K</td>
-                          <td className="py-3 px-4 text-center">{(1/results.proj.RT).toFixed(3)} W/m²K</td>
+                          <td className="py-3 px-4 font-sans font-semibold text-white">Transmitancia Térmica {"($U$)"}</td>
+                          <td className="py-3 px-4 text-center font-mono">{(1/results.base.RT).toFixed(3)} W/m²K</td>
+                          <td className="py-3 px-4 text-center font-mono">{(1/results.proj.RT).toFixed(3)} W/m²K</td>
                           <td className="py-3 px-4 text-center font-sans">
                             {results.proj.RT > results.base.RT ? (
                               <span className="px-2 py-0.5 rounded bg-green-500/20 text-green-400 text-[10px] font-bold">Disminuye Pérdida</span>
@@ -1564,7 +1564,7 @@ export default function CondensationVerifier() {
                           </td>
                         </tr>
                         <tr>
-                          <td className="py-3 px-4 font-sans font-semibold text-white">T° Superficie Interior ($T_{si}$)</td>
+                          <td className="py-3 px-4 font-sans font-semibold text-white">T° Superficie Interior {"($T_{si}$)"}</td>
                           <td className="py-3 px-4 text-center">{results.base.T_si.toFixed(1)}°C</td>
                           <td className="py-3 px-4 text-center">{results.proj.T_si.toFixed(1)}°C</td>
                           <td className="py-3 px-4 text-center font-sans">
