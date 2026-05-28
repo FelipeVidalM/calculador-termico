@@ -158,17 +158,114 @@ export default function CondensationVerifier() {
   const [bibSearch, setBibSearch] = useState('');
   const [bibFilterG, setBibFilterG] = useState('');
 
+  const getMaterialCategory = (m) => {
+    const name = m.n.toLowerCase();
+    const group = (m.g || '').toLowerCase();
+    
+    if (name.includes('lana') || name.includes('eps') || name.includes('celulosa') || name.includes('corcho aglomerado') || name.includes('poliuretano') || name.includes('aislante') || name.includes('elastomérica')) {
+      return 'Aislantes';
+    }
+    if (name.includes('pintura') || name.includes('barniz') || name.includes('adhesivo eifs') || name.includes('impregnante') || name.includes('adhesivo')) {
+      return 'Pinturas y Adhesivos';
+    }
+    if (name.includes('yeso') || name.includes('volcán') || name.includes('placa') || name.includes('mdf') || name.includes('osb') || name.includes('terciado') || name.includes('contrachapada') || name.includes('panel') || name.includes('smartpanel')) {
+      return 'Placas y Paneles';
+    }
+    if (name.includes('estuco') || name.includes('mortero') || name.includes('revoque') || name.includes('enlucido')) {
+      return 'Morteros y Estucos';
+    }
+    if (name.includes('hormigón') || name.includes('ladrillo') || name.includes('cemento arena')) {
+      return 'Hormigón y Albañilería';
+    }
+    if (name.includes('fieltro') || name.includes('polietileno') || name.includes('klober') || name.includes('tyvek') || name.includes('typar') || name.includes('wrap') || name.includes('membrana') || name.includes('impermeabilizante') || name.includes('bitumen fieltro')) {
+      return 'Barreras y Fieltros';
+    }
+    if (group.includes('metales') || name.includes('aluminio') || name.includes('acero') || name.includes('cobre') || name.includes('zinc') || name.includes('plomo') || name.includes('bronce') || name.includes('latón') || name.includes('hierro')) {
+      return 'Metales';
+    }
+    if (group.includes('plásticos') || group.includes('caucho') || name.includes('acrílico') || name.includes('policarbonato') || name.includes('pvc') || name.includes('ptfe') || name.includes('silic') || name.includes('epóx') || name.includes('caucho') || name.includes('neopreno') || name.includes('epdm') || name.includes('piso') || name.includes('alfombra') || name.includes('linóleo')) {
+      return 'Plásticos y Gomas';
+    }
+    if (group.includes('rocas') || group.includes('suelos') || group.includes('vidrio') || name.includes('roca') || name.includes('suelo') || name.includes('arcilla') || name.includes('arena') || name.includes('grava') || name.includes('vidrio') || name.includes('mosaico') || name.includes('caliza') || name.includes('granito') || name.includes('basalto') || name.includes('mármol')) {
+      return 'Rocas, Suelos y Vidrio';
+    }
+    
+    if (m.barrera) return 'Barreras y Fieltros';
+    return 'Otros';
+  };
+
+  const getCategoryStyles = (g, isActive) => {
+    switch (g) {
+      case 'Aislantes':
+        return isActive 
+          ? 'bg-emerald-600 text-white border-emerald-500' 
+          : 'bg-emerald-950/20 text-emerald-400 hover:bg-emerald-950/40 border border-emerald-500/25';
+      case 'Placas y Paneles':
+        return isActive 
+          ? 'bg-amber-600 text-white border-amber-500' 
+          : 'bg-amber-950/20 text-amber-400 hover:bg-amber-950/40 border border-amber-500/25';
+      case 'Morteros y Estucos':
+        return isActive 
+          ? 'bg-rose-600 text-white border-rose-500' 
+          : 'bg-rose-950/20 text-rose-400 hover:bg-rose-950/40 border border-rose-500/25';
+      case 'Hormigón y Albañilería':
+        return isActive 
+          ? 'bg-slate-600 text-white border-slate-500' 
+          : 'bg-slate-900/40 text-slate-300 hover:bg-slate-900/60 border border-slate-500/25';
+      case 'Barreras y Fieltros':
+        return isActive 
+          ? 'bg-sky-600 text-white border-sky-500' 
+          : 'bg-sky-950/20 text-sky-400 hover:bg-sky-950/40 border border-sky-500/25';
+      case 'Metales':
+        return isActive 
+          ? 'bg-indigo-600 text-white border-indigo-500' 
+          : 'bg-indigo-950/20 text-indigo-400 hover:bg-indigo-950/40 border border-indigo-500/25';
+      case 'Plásticos y Gomas':
+        return isActive 
+          ? 'bg-teal-600 text-white border-teal-500' 
+          : 'bg-teal-950/20 text-teal-400 hover:bg-teal-950/40 border border-teal-500/25';
+      case 'Rocas, Suelos y Vidrio':
+        return isActive 
+          ? 'bg-purple-600 text-white border-purple-500' 
+          : 'bg-purple-950/20 text-purple-400 hover:bg-purple-950/40 border border-purple-500/25';
+      case 'Pinturas y Adhesivos':
+        return isActive 
+          ? 'bg-pink-600 text-white border-pink-500' 
+          : 'bg-pink-950/20 text-pink-400 hover:bg-pink-950/40 border border-pink-500/25';
+      case 'Otros':
+        return isActive 
+          ? 'bg-fuchsia-600 text-white border-fuchsia-500' 
+          : 'bg-fuchsia-950/20 text-fuchsia-400 hover:bg-fuchsia-950/40 border border-fuchsia-500/25';
+      default:
+        return isActive 
+          ? 'bg-blue-600 text-white border-blue-500' 
+          : 'bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10';
+    }
+  };
+
   const libraryGroups = useMemo(() => {
-    return [...new Set(allMaterials.map(m => m.g))];
-  }, [allMaterials]);
+    return [
+      'Aislantes',
+      'Placas y Paneles',
+      'Morteros y Estucos',
+      'Hormigón y Albañilería',
+      'Barreras y Fieltros',
+      'Metales',
+      'Plásticos y Gomas',
+      'Rocas, Suelos y Vidrio',
+      'Pinturas y Adhesivos',
+      'Otros'
+    ];
+  }, []);
 
   const filteredMaterials = useMemo(() => {
     const q = bibSearch.toLowerCase();
     return allMaterials
       .map((m, i) => ({ m, i }))
       .filter(({ m }) => {
-        const gOk = !bibFilterG || m.g === bibFilterG;
-        const qOk = !q || m.n.toLowerCase().includes(q) || (m.g || '').toLowerCase().includes(q);
+        const cat = getMaterialCategory(m);
+        const gOk = !bibFilterG || cat === bibFilterG;
+        const qOk = !q || m.n.toLowerCase().includes(q) || cat.toLowerCase().includes(q) || (m.g || '').toLowerCase().includes(q);
         return gOk && qOk;
       });
   }, [allMaterials, bibSearch, bibFilterG]);
@@ -1876,30 +1973,29 @@ export default function CondensationVerifier() {
               </div>
 
               {/* Filtering Pills */}
-              <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-none mb-3 shrink-0">
+              <div className="flex gap-2 overflow-x-auto pb-2.5 scrollbar-none mb-4 shrink-0 border-b border-white/5 pr-2">
                 <button
                   onClick={() => setBibFilterG('')}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer transition-all border shadow-sm ${
                     !bibFilterG 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
+                      ? 'bg-blue-600 text-white border-blue-500 shadow-blue-500/20' 
+                      : 'bg-white/5 text-gray-300 border-white/10 hover:text-white hover:bg-white/10'
                   }`}
                 >
-                  Todos
+                  📁 Todos
                 </button>
-                {libraryGroups.map(g => (
-                  <button
-                    key={g}
-                    onClick={() => setBibFilterG(g)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors ${
-                      bibFilterG === g 
-                        ? 'bg-blue-600 text-white' 
-                        : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
-                    }`}
-                  >
-                    {g}
-                  </button>
-                ))}
+                {libraryGroups.map(g => {
+                  const isActive = bibFilterG === g;
+                  return (
+                    <button
+                      key={g}
+                      onClick={() => setBibFilterG(g)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer transition-all border shadow-sm ${getCategoryStyles(g, isActive)}`}
+                    >
+                      {g}
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Materials Scroll List */}
@@ -1907,18 +2003,34 @@ export default function CondensationVerifier() {
                 {filteredMaterials.slice(0, 100).map(({ m, i }) => {
                   const hasLam = m.lam != null;
                   const muDisp = matMuDisp(m);
+                  const cat = getMaterialCategory(m);
+                  const catColorClass = getCategoryStyles(cat, false)
+                    .replace('hover:bg-emerald-950/40', '')
+                    .replace('hover:bg-amber-950/40', '')
+                    .replace('hover:bg-rose-950/40', '')
+                    .replace('hover:bg-slate-900/60', '')
+                    .replace('hover:bg-sky-950/40', '')
+                    .replace('hover:bg-indigo-950/40', '')
+                    .replace('hover:bg-teal-950/40', '')
+                    .replace('hover:bg-purple-950/40', '')
+                    .replace('hover:bg-pink-950/40', '')
+                    .replace('hover:bg-fuchsia-950/40', '');
+
                   return (
                     <div
                       key={i}
                       onClick={() => handleAddFromLibrary(i)}
                       className="p-3 hover:bg-white/5 cursor-pointer transition-colors flex justify-between items-center group text-left"
                     >
-                      <div className="space-y-0.5">
-                        <div className="font-semibold text-white text-xs group-hover:text-blue-400 flex items-center gap-1.5">
+                      <div className="space-y-1">
+                        <div className="font-semibold text-white text-xs group-hover:text-blue-400 flex items-center gap-1.5 flex-wrap">
                           {m.n}
                           {m.barrera && (
                             <span className="px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 text-[8px] font-bold">BV</span>
                           )}
+                          <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold border transition-colors ${catColorClass}`}>
+                            {cat}
+                          </span>
                         </div>
                         <div className="text-[10px] text-gray-500 font-mono">
                           {hasLam ? `λ = ${m.lam} W/mK` : (m.R != null ? `R = ${m.R}` : '')}
