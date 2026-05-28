@@ -102,17 +102,12 @@ export default function WindowCalculator() {
     cv.height = H * dpr;
     ctx.scale(dpr, dpr);
 
-    // Background
-    ctx.fillStyle = '#0f172a';
+    // 1. Background & Technical Grid
+    ctx.fillStyle = '#0b0f19';
     ctx.fillRect(0, 0, W, H);
 
-    const glass = GLASS_TYPES.find(g => g.id === inputs.glassId);
-    const frame = FRAME_TYPES.find(f => f.id === inputs.frameId);
-    const spacer = SPACER_TYPES.find(s => s.id === inputs.spacerId);
-
-    // 1. Grid & Guidelines (Subtle tech overlay)
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.02)';
+    ctx.lineWidth = 0.8;
     for (let x = 0; x < W; x += 20) {
       ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
     }
@@ -120,319 +115,430 @@ export default function WindowCalculator() {
       ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
     }
 
-    // Label coordinates
-    ctx.font = '9px monospace';
-    ctx.fillStyle = '#475569';
-    ctx.fillText('NCh 3137-1', 15, 20); // Moved to top-left
+    const glass = GLASS_TYPES.find(g => g.id === inputs.glassId);
+    const frame = FRAME_TYPES.find(f => f.id === inputs.frameId);
+    const spacer = SPACER_TYPES.find(s => s.id === inputs.spacerId);
 
-    // 1.5 Draw miniature window elevation (bottom-left)
-    const mX = 20;
-    const mY = 145;
-    const mW = 60;
-    const mH = 50;
+    // Header Label
+    ctx.font = 'bold 8px monospace';
+    ctx.fillStyle = '#475569';
+    ctx.textAlign = 'center';
+    ctx.fillText('ESQUEMA TÉCNICO DE CÁLCULO · NCh 3137 / ISO 10077', W / 2, 14);
+
+    // Helper function for text legibility (stroke outline)
+    const drawTextWithOutline = (text, x, y, font, fillStyle, align = 'left') => {
+      ctx.save();
+      ctx.font = font;
+      ctx.textAlign = align;
+      ctx.strokeStyle = '#0b0f19';
+      ctx.lineWidth = 3;
+      ctx.lineJoin = 'round';
+      ctx.strokeText(text, x, y);
+      ctx.fillStyle = fillStyle;
+      ctx.fillText(text, x, y);
+      ctx.restore();
+    };
+
+    // ==========================================
+    // 2. LEFT COLUMN (Elevation & Frame Cards)
+    // ==========================================
+    
+    // 2.1 Environmental Tag Left (EXTERIOR)
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.font = 'bold 8px sans-serif';
+    ctx.fillStyle = '#38bdf8';
+    ctx.fillText('EXTERIOR: Te = 5°C', 15, 27);
+    ctx.restore();
+
+    // 2.2 Elevation Card (Y: 33 to 135)
+    const mX = 22;
+    const mY = 46;
+    const mW = 55;
+    const mH = 45;
 
     ctx.save();
-    // Background of mini-map
+    // Background of mini-map card
     ctx.fillStyle = 'rgba(30, 41, 59, 0.4)';
-    ctx.fillRect(mX - 5, mY - 12, mW + 45, mH + 34);
+    ctx.fillRect(12, 33, 105, 98);
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
     ctx.lineWidth = 1;
-    ctx.strokeRect(mX - 5, mY - 12, mW + 45, mH + 34);
+    ctx.strokeRect(12, 33, 105, 98);
 
-    ctx.fillStyle = '#94a3b8';
+    ctx.fillStyle = '#64748b';
     ctx.font = 'bold 7px sans-serif';
-    ctx.fillText('MEDIDAS (mm)', mX, mY - 5);
+    ctx.fillText('ELEVACIÓN (mm)', mX - 5, 41);
 
     // Draw outer frame of mini window
-    ctx.strokeStyle = '#64748b';
-    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 2;
     ctx.strokeRect(mX, mY, mW, mH);
 
     // Glass infill
-    ctx.fillStyle = 'rgba(56, 189, 248, 0.15)';
+    ctx.fillStyle = 'rgba(56, 189, 248, 0.08)';
     const scaledF = Math.max(2, Math.min(8, (inputs.frameWidth / 120) * 8));
     ctx.fillRect(mX + scaledF, mY + scaledF, mW - 2 * scaledF, mH - 2 * scaledF);
-    ctx.strokeStyle = '#475569';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 0.5;
     ctx.strokeRect(mX + scaledF, mY + scaledF, mW - 2 * scaledF, mH - 2 * scaledF);
 
     // Dimensional line: Width (W)
-    ctx.strokeStyle = '#94a3b8';
+    ctx.strokeStyle = '#64748b';
     ctx.lineWidth = 0.8;
     ctx.beginPath();
     ctx.moveTo(mX, mY + mH + 4);
     ctx.lineTo(mX + mW, mY + mH + 4);
     ctx.stroke();
     // Arrows for width
-    ctx.fillStyle = '#94a3b8';
+    ctx.fillStyle = '#64748b';
     ctx.beginPath();
     ctx.moveTo(mX, mY + mH + 4); ctx.lineTo(mX + 3, mY + mH + 2); ctx.lineTo(mX + 3, mY + mH + 6); ctx.fill();
     ctx.beginPath();
     ctx.moveTo(mX + mW, mY + mH + 4); ctx.lineTo(mX + mW - 3, mY + mH + 2); ctx.lineTo(mX + mW - 3, mY + mH + 6); ctx.fill();
+    
     // Text Width
-    ctx.fillStyle = '#e2e8f0';
-    ctx.font = '7px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText(`W:${inputs.width}`, mX + mW/2, mY + mH + 11);
+    drawTextWithOutline(`W: ${inputs.width}`, mX + mW / 2, mY + mH + 12, 'bold 7px monospace', '#e2e8f0', 'center');
 
     // Dimensional line: Height (H)
-    ctx.strokeStyle = '#94a3b8';
+    ctx.strokeStyle = '#64748b';
     ctx.beginPath();
-    ctx.moveTo(mX - 3, mY);
-    ctx.lineTo(mX - 3, mY + mH);
+    ctx.moveTo(mX - 4, mY);
+    ctx.lineTo(mX - 4, mY + mH);
     ctx.stroke();
     // Arrows for height
     ctx.beginPath();
-    ctx.moveTo(mX - 3, mY); ctx.lineTo(mX - 5, mY + 3); ctx.lineTo(mX - 1, mY + 3); ctx.fill();
+    ctx.moveTo(mX - 4, mY); ctx.lineTo(mX - 6, mY + 3); ctx.lineTo(mX - 2, mY + 3); ctx.fill();
     ctx.beginPath();
-    ctx.moveTo(mX - 3, mY + mH); ctx.lineTo(mX - 5, mY + mH - 3); ctx.lineTo(mX - 1, mY + mH - 3); ctx.fill();
+    ctx.moveTo(mX - 4, mY + mH); ctx.lineTo(mX - 6, mY + mH - 3); ctx.lineTo(mX - 2, mY + mH - 3); ctx.fill();
+    
     // Text Height
     ctx.save();
-    ctx.translate(mX - 7, mY + mH/2);
+    ctx.translate(mX - 8, mY + mH / 2);
     ctx.rotate(-Math.PI / 2);
-    ctx.fillStyle = '#e2e8f0';
-    ctx.font = '7px monospace';
-    ctx.fillText(`H:${inputs.height}`, 0, 2);
+    drawTextWithOutline(`H: ${inputs.height}`, 0, 2, 'bold 7px monospace', '#e2e8f0', 'center');
     ctx.restore();
 
-    // Frame Thickness Callout (cota espesor de marco)
+    // Frame Thickness Callout
+    drawTextWithOutline(`Marco: ${inputs.frameWidth}mm`, mX - 5, mY + mH + 22, 'bold 7px monospace', '#f87171');
+    ctx.restore();
+
+    // 2.3 Frame properties card (Left Bottom Y: 148 to 238)
+    const cardY = 148;
+    ctx.save();
+    ctx.fillStyle = 'rgba(239, 68, 68, 0.04)';
+    ctx.fillRect(12, cardY, 105, 90);
+    ctx.strokeStyle = 'rgba(239, 68, 68, 0.12)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(12, cardY, 105, 90);
+
+    // Text details
     ctx.fillStyle = '#f87171';
+    ctx.font = 'bold 8px sans-serif';
+    ctx.fillText('MARCO (Frame)', 18, cardY + 14);
+    
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 11px monospace';
+    ctx.fillText(`Uf = ${frame.uValue.toFixed(2)}`, 18, cardY + 30);
+    
+    ctx.font = '7px sans-serif';
+    ctx.fillStyle = '#94a3b8';
+    
+    // Text wrapping for frame name to prevent spilling out
+    const frameWords = frame.name.split(' ');
+    let line1 = '';
+    let line2 = '';
+    for (let word of frameWords) {
+      if ((line1 + word).length < 20) {
+        line1 += (line1 ? ' ' : '') + word;
+      } else {
+        line2 += (line2 ? ' ' : '') + word;
+      }
+    }
+    ctx.fillText(line1, 18, cardY + 45);
+    if (line2) {
+      ctx.fillText(line2.length > 20 ? line2.substring(0, 18) + '..' : line2, 18, cardY + 54);
+    }
+    
+    ctx.fillStyle = '#64748b';
     ctx.font = '7px monospace';
-    ctx.textAlign = 'left';
-    ctx.fillText(`Marco:${inputs.frameWidth}mm`, mX, mY + mH + 19);
-
+    ctx.fillText(`Material: ${frame.material.toUpperCase()}`, 18, cardY + 74);
+    if (frame.rpt) {
+      ctx.fillStyle = '#fb923c';
+      ctx.fillText('✓ C/ Puente Térmico', 18, cardY + 83);
+    } else {
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText('✗ S/ Puente Térmico', 18, cardY + 83);
+    }
     ctx.restore();
 
-    // 2. DRAW FRAME (Bottom part: X = 140 to 260, Y = 170 to 240)
-    const fX = 140;
-    const fY = 170;
-    const fW = 120;
-    const fH = 65;
+
+    // ==========================================
+    // 3. RIGHT COLUMN (Glass & Uw Result Cards)
+    // ==========================================
+    
+    // 3.1 Environmental Tag Right (INTERIOR)
+    ctx.save();
+    ctx.textAlign = 'right';
+    ctx.font = 'bold 8px sans-serif';
+    ctx.fillStyle = '#f97316';
+    ctx.fillText('INTERIOR: Ti = 20°C', W - 15, 27);
+    ctx.restore();
+
+    // 3.2 Glass Ug properties card (Right Top Y: 33 to 135)
+    const gCardY = 33;
+    ctx.save();
+    ctx.fillStyle = 'rgba(56, 189, 248, 0.04)';
+    ctx.fillRect(283, gCardY, 105, 98);
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.12)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(283, gCardY, 105, 98);
+
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#38bdf8';
+    ctx.font = 'bold 8px sans-serif';
+    ctx.fillText('VIDRIO (Glass)', 289, gCardY + 14);
+    
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 11px monospace';
+    ctx.fillText(`Ug = ${glass.uValue.toFixed(2)}`, 289, gCardY + 30);
+    
+    ctx.font = '7px sans-serif';
+    ctx.fillStyle = '#94a3b8';
+    
+    // Text wrapping for glass name
+    const glassWords = glass.name.split(' ');
+    let gLine1 = '';
+    let gLine2 = '';
+    for (let word of glassWords) {
+      if ((gLine1 + word).length < 20) {
+        gLine1 += (gLine1 ? ' ' : '') + word;
+      } else {
+        gLine2 += (gLine2 ? ' ' : '') + word;
+      }
+    }
+    ctx.fillText(gLine1, 289, gCardY + 45);
+    if (gLine2) {
+      ctx.fillText(gLine2.length > 20 ? gLine2.substring(0, 18) + '..' : gLine2, 289, gCardY + 54);
+    }
+
+    ctx.fillStyle = '#64748b';
+    ctx.font = '7px monospace';
+    ctx.fillText(`Tipo: ${glass.id === 'simple' ? 'SIMPLE' : 'DVH (Doble)'}`, 289, gCardY + 74);
+    ctx.fillText(`Capa: ${glass.id.includes('lowe') ? 'Bajo Emisivo' : 'Estándar'}`, 289, gCardY + 83);
+    ctx.restore();
+
+    // 3.3 Global result Uw box (Right Bottom Y: 148 to 238)
+    const resCardY = 148;
+    ctx.save();
+    ctx.fillStyle = '#0f172a';
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 1.2;
+    ctx.fillRect(283, resCardY, 105, 90);
+    ctx.strokeRect(283, resCardY, 105, 90);
+
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#38bdf8';
+    ctx.font = 'bold 8px sans-serif';
+    ctx.fillText('RESULTADO GLOBAL', 289, resCardY + 16);
+    ctx.fillText('DE LA VENTANA Uw', 289, resCardY + 26);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 15px monospace';
+    ctx.fillText(`${uw.toFixed(2)}`, 289, resCardY + 52);
+    
+    ctx.fillStyle = '#38bdf8';
+    ctx.font = 'bold 9px sans-serif';
+    ctx.fillText('W/m²K', 289, resCardY + 66);
+    
+    ctx.fillStyle = '#64748b';
+    ctx.font = '6px monospace';
+    ctx.fillText('MÉTODO DETALLADO', 289, resCardY + 81);
+    ctx.restore();
+
+
+    // ==========================================
+    // 4. CENTER COLUMN (Cross-section schematic)
+    // ==========================================
+    const cX = 200; // Recenter perfectly
+
+    // 4.1 DRAW FRAME PROFILE (X = 160 to 240, Y = 150 to 238)
+    const fProfileX = cX - 40; // 160
+    const fProfileY = 150;
+    const fProfileW = 80;
+    const fProfileH = 88;
 
     ctx.save();
     if (frame.id === 'madera') {
-      // Wood frame (Wood grains)
-      ctx.fillStyle = '#854f07'; // Warm brownish wood
-      ctx.fillRect(fX, fY, fW, fH);
-      ctx.strokeStyle = '#a16207';
-      ctx.lineWidth = 1.5;
-      // Growth rings
-      for (let r = 20; r < 140; r += 15) {
+      ctx.fillStyle = '#653e0d';
+      ctx.fillRect(fProfileX, fProfileY, fProfileW, fProfileH);
+      ctx.strokeStyle = '#854f07';
+      ctx.lineWidth = 1.2;
+      ctx.strokeRect(fProfileX, fProfileY, fProfileW, fProfileH);
+      // Wood grain lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 1;
+      for (let r = 20; r < 120; r += 15) {
         ctx.beginPath();
-        ctx.arc(fX + fW/2, fY + fH + 10, r, Math.PI, 2 * Math.PI);
+        ctx.arc(fProfileX + fProfileW / 2, fProfileY + fProfileH + 10, r, Math.PI, 2 * Math.PI);
         ctx.stroke();
       }
     } else if (frame.id === 'pvc') {
-      // PVC Frame (multi-chambers)
-      ctx.fillStyle = '#334155'; // PVC Body
-      ctx.fillRect(fX, fY, fW, fH);
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(fProfileX, fProfileY, fProfileW, fProfileH);
       ctx.strokeStyle = '#475569';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(fX, fY, fW, fH);
-      // Inner Chambers (hollow rooms)
-      ctx.fillStyle = '#0f172a';
-      const cW = 22;
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(fProfileX, fProfileY, fProfileW, fProfileH);
+      
+      // PVC Chambers
+      ctx.fillStyle = '#0b0f19';
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1;
+      const cW = 18;
       const cH = 20;
-      for (let i = 0; i < 4; i++) {
-        ctx.fillRect(fX + 7 + i * 27, fY + 8, cW, cH);
-        ctx.strokeRect(fX + 7 + i * 27, fY + 8, cW, cH);
-        ctx.fillRect(fX + 7 + i * 27, fY + 36, cW, cH);
-        ctx.strokeRect(fX + 7 + i * 27, fY + 36, cW, cH);
+      for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 3; col++) {
+          ctx.fillRect(fProfileX + 6 + col * 24, fProfileY + 8 + row * 26, cW, cH);
+          ctx.strokeRect(fProfileX + 6 + col * 24, fProfileY + 8 + row * 26, cW, cH);
+        }
       }
     } else if (frame.id === 'alu-sin-rpt') {
-      // Metallic Aluminum without RPT (cold hollow metal)
-      ctx.fillStyle = '#1e293b';
-      ctx.fillRect(fX, fY, fW, fH);
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(fProfileX, fProfileY, fProfileW, fProfileH);
       ctx.strokeStyle = '#64748b';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(fX, fY, fW, fH);
-      // Hollow inner section
-      ctx.fillStyle = '#0f172a';
-      ctx.fillRect(fX + 6, fY + 6, fW - 12, fH - 12);
-      ctx.strokeRect(fX + 6, fY + 6, fW - 12, fH - 12);
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(fProfileX, fProfileY, fProfileW, fProfileH);
+      ctx.fillStyle = '#0b0f19';
+      ctx.fillRect(fProfileX + 6, fProfileY + 6, fProfileW - 12, fProfileH - 12);
+      ctx.strokeRect(fProfileX + 6, fProfileY + 6, fProfileW - 12, fProfileH - 12);
     } else if (frame.id === 'alu-con-rpt') {
-      // Aluminum with RPT (Thermal Break polyamide)
-      // Left and right metal sections separated by polyamide
-      ctx.fillStyle = '#1e293b';
+      ctx.fillStyle = '#334155';
       ctx.strokeStyle = '#64748b';
-      ctx.lineWidth = 2;
-      // Left section
-      ctx.fillRect(fX, fY, 45, fH);
-      ctx.strokeRect(fX, fY, 45, fH);
-      // Right section
-      ctx.fillRect(fX + 75, fY, 45, fH);
-      ctx.strokeRect(fX + 75, fY, 45, fH);
-      // Hollow left/right
-      ctx.fillStyle = '#0f172a';
-      ctx.fillRect(fX + 6, fY + 6, 33, fH - 12);
-      ctx.fillRect(fX + 81, fY + 6, 33, fH - 12);
-      // Polyamide thermal break (orange bar) in middle
-      ctx.fillStyle = '#ea580c'; // Neon orange polyamide
-      ctx.fillRect(fX + 45, fY + 15, 30, fH - 30);
+      ctx.lineWidth = 1.5;
+      // Metal halves
+      ctx.fillRect(fProfileX, fProfileY, 30, fProfileH);
+      ctx.strokeRect(fProfileX, fProfileY, 30, fProfileH);
+      ctx.fillRect(fProfileX + 50, fProfileY, 30, fProfileH);
+      ctx.strokeRect(fProfileX + 50, fProfileY, 30, fProfileH);
+      // Hollow interiors
+      ctx.fillStyle = '#0b0f19';
+      ctx.fillRect(fProfileX + 5, fProfileY + 5, 20, fProfileH - 10);
+      ctx.fillRect(fProfileX + 55, fProfileY + 5, 20, fProfileH - 10);
+      
+      // Polyamide insulation thermal break (RPT) in the middle
+      ctx.fillStyle = '#ea580c';
+      ctx.fillRect(fProfileX + 30, fProfileY + 16, 20, fProfileH - 32);
       ctx.fillStyle = '#f97316';
-      ctx.font = 'bold 8px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('RPT', fX + 60, fY + fH/2 + 3);
+      ctx.fillRect(fProfileX + 30, fProfileY + 16, 20, 4);
+      ctx.fillRect(fProfileX + 30, fProfileY + fProfileH - 20, 20, 4);
+
+      drawTextWithOutline('RPT', fProfileX + 40, fProfileY + fProfileH / 2 + 2, 'bold 7px sans-serif', '#fb923c', 'center');
     }
     ctx.restore();
 
-    // 3. DRAW GLASS PANES (Top part: Y = 25 to 170)
-    const gY = 25;
-    const gH = 145; // Height of glass panes
+    // 4.2 DRAW GLASS PANES (Top part: Y = 33 to 150)
+    const gY = 33;
+    const gH = 117;
     ctx.save();
     if (glass.id === 'simple') {
-      // Single Glass pane in center X = 200
-      ctx.fillStyle = 'rgba(56, 189, 248, 0.4)';
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.3)';
       ctx.strokeStyle = '#38bdf8';
       ctx.lineWidth = 1.5;
-      ctx.fillRect(196, gY, 8, gH);
-      ctx.strokeRect(196, gY, 8, gH);
-      // Shading reflection lines
-      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-      ctx.beginPath(); ctx.moveTo(202, gY + 10); ctx.lineTo(198, gY + 30); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(202, gY + 80); ctx.lineTo(198, gY + 100); ctx.stroke();
+      ctx.fillRect(cX - 4, gY, 8, gH);
+      ctx.strokeRect(cX - 4, gY, 8, gH);
+      
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.beginPath(); ctx.moveTo(cX + 2, gY + 20); ctx.lineTo(cX - 2, gY + 40); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cX + 2, gY + 70); ctx.lineTo(cX - 2, gY + 90); ctx.stroke();
     } else {
-      // Double Glazing (DVH)
-      // Left pane (X = 184 to 190) and Right pane (X = 210 to 216)
-      ctx.fillStyle = 'rgba(56, 189, 248, 0.3)';
+      // DVH panes: Left at cX - 14, Right at cX + 6
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.25)';
       ctx.strokeStyle = '#38bdf8';
       ctx.lineWidth = 1;
       
-      ctx.fillRect(184, gY, 6, gH);
-      ctx.strokeRect(184, gY, 6, gH);
+      ctx.fillRect(cX - 14, gY, 6, gH);
+      ctx.strokeRect(cX - 14, gY, 6, gH);
       
-      ctx.fillRect(210, gY, 6, gH);
-      ctx.strokeRect(210, gY, 6, gH);
+      ctx.fillRect(cX + 8, gY, 6, gH);
+      ctx.strokeRect(cX + 8, gY, 6, gH);
 
-      // Gas Cavity interior
-      ctx.fillStyle = glass.id === 'dvh-argon' ? 'rgba(34, 197, 94, 0.05)' : 'rgba(255,255,255,0.01)';
-      ctx.fillRect(190, gY, 20, gH);
+      // Cavity
+      ctx.fillStyle = glass.id === 'dvh-argon' ? 'rgba(34, 197, 94, 0.03)' : 'rgba(255,255,255,0.01)';
+      ctx.fillRect(cX - 8, gY, 16, gH);
 
-      // Lowe Emissivity coating reflection line (yellow neon line inside)
+      // Lowe coating line
       if (glass.id === 'dvh-lowe') {
-        ctx.strokeStyle = '#fbbf24'; // Lowe Yellow Neon line
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 1.2;
         ctx.beginPath();
-        ctx.moveTo(191, gY + 2);
-        ctx.lineTo(191, gY + gH - 2);
+        ctx.moveTo(cX - 7, gY + 2);
+        ctx.lineTo(cX - 7, gY + gH - 2);
         ctx.stroke();
-        
-        ctx.fillStyle = '#fbbf24';
-        ctx.font = 'bold 8px sans-serif';
-        ctx.fillText('Low-E', 154, gY + 35);
       }
 
-      // Spacer Block (resting at bottom X = 190 to 210, Y = 150 to 170)
-      const spY = 148;
-      const spH = 22;
-      ctx.fillStyle = spacer.id === 'warm-edge' ? '#166534' : '#64748b'; // Warm Edge green vs Aluminum silver
-      ctx.fillRect(190, spY, 20, spH);
-      ctx.strokeStyle = spacer.id === 'warm-edge' ? '#4ade80' : '#94a3b8';
-      ctx.strokeRect(190, spY, 20, spH);
-      // Small dots inside spacer (desiccant)
-      ctx.fillStyle = 'rgba(255,255,255,0.3)';
-      for (let dX = 193; dX <= 207; dX += 4) {
-        ctx.fillRect(dX, spY + 5, 2, 2);
-        ctx.fillRect(dX, spY + 14, 2, 2);
-      }
+      // Spacer Block (resting at Y = 130 to 148)
+      const spY = 130;
+      const spH = 18;
+      ctx.fillStyle = spacer.id === 'warm-edge' ? '#14532d' : '#475569';
+      ctx.fillRect(cX - 8, spY, 16, spH);
+      ctx.strokeStyle = spacer.id === 'warm-edge' ? '#22c55e' : '#94a3b8';
+      ctx.strokeRect(cX - 8, spY, 16, spH);
 
-      // Spacer label Psi
-      ctx.fillStyle = spacer.id === 'warm-edge' ? '#4ade80' : '#cbd5e1';
-      ctx.font = 'bold 8px monospace';
-      ctx.fillText(`Ψ = ${spacer.psiValue.toFixed(2)}`, 225, spY + 14);
+      // Spacer Psi Label (X = cX + 15, Y = 141)
+      drawTextWithOutline(
+        `Ψ: ${spacer.psiValue.toFixed(2)}`, 
+        cX + 12, 
+        spY + 11, 
+        'bold 7px monospace', 
+        spacer.id === 'warm-edge' ? '#4ade80' : '#cbd5e1'
+      );
     }
     ctx.restore();
 
-    // 4. DRAW HEAT FLOW ARROWS & LABELS
-    // Interior (Right, warm orange) to Exterior (Left, cold blue)
+
+    // ==========================================
+    // 5. DRAW HEAT FLOW ARROWS (Middle Spans)
+    // ==========================================
     ctx.save();
-    const arrowY = 90;
     
-    // Calculate path transparency based on insulating performance
-    // Better insulation = thinner/more transparent arrows. High Uw = thick red/orange lines.
-    const heatFlowThickness = Math.max(1, Math.min(8, (uw / 5.8) * 8));
-    const flowAlpha = Math.max(0.2, Math.min(1.0, uw / 5.8));
+    // Confined bounds for arrows: from X = 250 (right) to X = 138 (left)
+    const arrowStartX = 250;
+    const arrowEndX = 138;
+    const flowAlpha = Math.max(0.3, Math.min(1.0, uw / 5.8));
+    const heatFlowThickness = Math.max(1.5, Math.min(7.5, (uw / 5.8) * 7.5));
 
-    // Draw frame heat flow arrow (at Y = 205)
+    // 5.1 Glass Heat Arrow (Y = 90)
+    const glassArrowY = 90;
     ctx.beginPath();
-    ctx.strokeStyle = `rgba(239, 68, 68, ${flowAlpha * 0.8})`; // Red
-    ctx.lineWidth = heatFlowThickness * 0.8;
-    ctx.moveTo(330, 205);
-    ctx.quadraticCurveTo(200, 205, 70, 205);
-    ctx.stroke();
-    // Arrow Head Exterior
-    ctx.fillStyle = `rgba(59, 130, 246, ${flowAlpha})`;
-    ctx.beginPath();
-    ctx.moveTo(70, 205);
-    ctx.lineTo(80, 201);
-    ctx.lineTo(80, 209);
-    ctx.fill();
-
-    // Draw glass heat flow arrow (at Y = 90)
-    ctx.beginPath();
-    ctx.strokeStyle = `rgba(249, 115, 22, ${flowAlpha})`; // Orange
+    ctx.strokeStyle = `rgba(249, 115, 22, ${flowAlpha})`;
     ctx.lineWidth = heatFlowThickness;
-    ctx.moveTo(330, arrowY);
-    ctx.bezierCurveTo(250, arrowY, 150, arrowY + 10, 70, arrowY);
+    ctx.moveTo(arrowStartX, glassArrowY);
+    ctx.bezierCurveTo(arrowStartX - 30, glassArrowY, cX + 20, glassArrowY + 10, arrowEndX, glassArrowY);
     ctx.stroke();
-    // Arrow Head Exterior
-    ctx.fillStyle = `rgba(59, 130, 246, ${flowAlpha})`;
+    
+    // Arrow Head Left (Exterior)
+    ctx.fillStyle = '#38bdf8';
     ctx.beginPath();
-    ctx.moveTo(70, arrowY);
-    ctx.lineTo(80, arrowY - 4);
-    ctx.lineTo(80, arrowY + 4);
+    ctx.moveTo(arrowEndX, glassArrowY);
+    ctx.lineTo(arrowEndX + 7, glassArrowY - 3.5);
+    ctx.lineTo(arrowEndX + 7, glassArrowY + 3.5);
     ctx.fill();
 
-    ctx.restore();
-
-    // 5. HUD TEXT LABELS (Dynamic parameters overlay)
-    ctx.save();
-    // Glass Label
+    // 5.2 Frame Heat Arrow (Y = 177)
+    const frameArrowY = 177;
+    ctx.beginPath();
+    ctx.strokeStyle = `rgba(239, 68, 68, ${flowAlpha * 0.9})`;
+    ctx.lineWidth = heatFlowThickness * 0.8;
+    ctx.moveTo(arrowStartX, frameArrowY);
+    ctx.quadraticCurveTo(cX + 10, frameArrowY, arrowEndX, frameArrowY);
+    ctx.stroke();
+    
+    // Arrow Head Left (Exterior)
     ctx.fillStyle = '#38bdf8';
-    ctx.font = 'bold 10px sans-serif';
-    ctx.fillText(`Ug = ${glass.uValue.toFixed(1)} W/m²K`, 220, 50);
-    ctx.font = '8px sans-serif';
-    ctx.fillStyle = '#94a3b8';
-    ctx.fillText(glass.name, 220, 62);
-
-    // Frame Label
-    ctx.fillStyle = '#f87171';
-    ctx.font = 'bold 10px sans-serif';
-    ctx.fillText(`Uf = ${frame.uValue.toFixed(1)} W/m²K`, 15, fY + 30);
-    ctx.font = '8px sans-serif';
-    ctx.fillStyle = '#94a3b8';
-    ctx.fillText(frame.name, 15, fY + 42);
-
-    // Inside / Outside Temperature tags
-    ctx.font = 'bold 10px sans-serif';
-    ctx.fillStyle = '#f97316'; // Orange Inside
-    ctx.textAlign = 'right';
-    ctx.fillText('INTERIOR (Warm)', W - 15, 45);
-    ctx.font = '9px monospace';
-    ctx.fillStyle = '#fb923c';
-    ctx.fillText('Ti = 20 °C', W - 15, 58);
-
-    ctx.font = 'bold 10px sans-serif';
-    ctx.fillStyle = '#3b82f6'; // Blue Outside
-    ctx.textAlign = 'left';
-    ctx.fillText('EXTERIOR (Cold)', 15, 45);
-    ctx.font = '9px monospace';
-    ctx.fillStyle = '#60a5fa';
-    ctx.fillText('Te = 5 °C', 15, 58);
-
-    // Draw active total result box in corner
-    ctx.fillStyle = '#1e293b';
-    ctx.strokeStyle = '#38bdf8';
-    ctx.lineWidth = 1.5;
-    ctx.fillRect(W - 125, H - 45, 110, 32);
-    ctx.strokeRect(W - 125, H - 45, 110, 32);
-
-    ctx.fillStyle = '#38bdf8';
-    ctx.font = 'bold 8px sans-serif';
-    ctx.fillText('GLOBAL RESULT Uw', W - 120, H - 34);
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 13px monospace';
-    ctx.fillText(`${uw.toFixed(2)} W/m²K`, W - 120, H - 19);
+    ctx.beginPath();
+    ctx.moveTo(arrowEndX, frameArrowY);
+    ctx.lineTo(arrowEndX + 7, frameArrowY - 3.5);
+    ctx.lineTo(arrowEndX + 7, frameArrowY + 3.5);
+    ctx.fill();
 
     ctx.restore();
   };
