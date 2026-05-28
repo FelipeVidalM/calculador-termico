@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Settings, 
@@ -86,6 +86,281 @@ export default function WindowCalculator() {
     const glass = GLASS_TYPES.find(g => g.id === inputs.glassId);
     const frame = FRAME_TYPES.find(f => f.id === inputs.frameId);
     return frame.material === 'metal' && !frame.rpt && glass.id === 'simple' && uw === 5.8;
+  }, [inputs, uw]);
+
+  const schematicCanvasRef = useRef(null);
+
+  const drawSchematic = () => {
+    const cv = schematicCanvasRef.current;
+    if (!cv) return;
+    const ctx = cv.getContext('2d');
+    const W = 400;
+    const H = 250;
+    const dpr = window.devicePixelRatio || 1;
+
+    cv.width = W * dpr;
+    cv.height = H * dpr;
+    ctx.scale(dpr, dpr);
+
+    // Background
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, W, H);
+
+    const glass = GLASS_TYPES.find(g => g.id === inputs.glassId);
+    const frame = FRAME_TYPES.find(f => f.id === inputs.frameId);
+    const spacer = SPACER_TYPES.find(s => s.id === inputs.spacerId);
+
+    // 1. Grid & Guidelines (Subtle tech overlay)
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < W; x += 20) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+    }
+    for (let y = 0; y < H; y += 20) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    }
+
+    // Label coordinates
+    ctx.font = '9px monospace';
+    ctx.fillStyle = '#475569';
+    ctx.fillText('NCh 3137-1', 15, H - 15);
+
+    // 2. DRAW FRAME (Bottom part: X = 140 to 260, Y = 170 to 240)
+    const fX = 140;
+    const fY = 170;
+    const fW = 120;
+    const fH = 65;
+
+    ctx.save();
+    if (frame.id === 'madera') {
+      // Wood frame (Wood grains)
+      ctx.fillStyle = '#854f07'; // Warm brownish wood
+      ctx.fillRect(fX, fY, fW, fH);
+      ctx.strokeStyle = '#a16207';
+      ctx.lineWidth = 1.5;
+      // Growth rings
+      for (let r = 20; r < 140; r += 15) {
+        ctx.beginPath();
+        ctx.arc(fX + fW/2, fY + fH + 10, r, Math.PI, 2 * Math.PI);
+        ctx.stroke();
+      }
+    } else if (frame.id === 'pvc') {
+      // PVC Frame (multi-chambers)
+      ctx.fillStyle = '#334155'; // PVC Body
+      ctx.fillRect(fX, fY, fW, fH);
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(fX, fY, fW, fH);
+      // Inner Chambers (hollow rooms)
+      ctx.fillStyle = '#0f172a';
+      const cW = 22;
+      const cH = 20;
+      for (let i = 0; i < 4; i++) {
+        ctx.fillRect(fX + 7 + i * 27, fY + 8, cW, cH);
+        ctx.strokeRect(fX + 7 + i * 27, fY + 8, cW, cH);
+        ctx.fillRect(fX + 7 + i * 27, fY + 36, cW, cH);
+        ctx.strokeRect(fX + 7 + i * 27, fY + 36, cW, cH);
+      }
+    } else if (frame.id === 'alu-sin-rpt') {
+      // Metallic Aluminum without RPT (cold hollow metal)
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(fX, fY, fW, fH);
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(fX, fY, fW, fH);
+      // Hollow inner section
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(fX + 6, fY + 6, fW - 12, fH - 12);
+      ctx.strokeRect(fX + 6, fY + 6, fW - 12, fH - 12);
+    } else if (frame.id === 'alu-con-rpt') {
+      // Aluminum with RPT (Thermal Break polyamide)
+      // Left and right metal sections separated by polyamide
+      ctx.fillStyle = '#1e293b';
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 2;
+      // Left section
+      ctx.fillRect(fX, fY, 45, fH);
+      ctx.strokeRect(fX, fY, 45, fH);
+      // Right section
+      ctx.fillRect(fX + 75, fY, 45, fH);
+      ctx.strokeRect(fX + 75, fY, 45, fH);
+      // Hollow left/right
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(fX + 6, fY + 6, 33, fH - 12);
+      ctx.fillRect(fX + 81, fY + 6, 33, fH - 12);
+      // Polyamide thermal break (orange bar) in middle
+      ctx.fillStyle = '#ea580c'; // Neon orange polyamide
+      ctx.fillRect(fX + 45, fY + 15, 30, fH - 30);
+      ctx.fillStyle = '#f97316';
+      ctx.font = 'bold 8px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('RPT', fX + 60, fY + fH/2 + 3);
+    }
+    ctx.restore();
+
+    // 3. DRAW GLASS PANES (Top part: Y = 25 to 170)
+    const gY = 25;
+    const gH = 145; // Height of glass panes
+    ctx.save();
+    if (glass.id === 'simple') {
+      // Single Glass pane in center X = 200
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.4)';
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 1.5;
+      ctx.fillRect(196, gY, 8, gH);
+      ctx.strokeRect(196, gY, 8, gH);
+      // Shading reflection lines
+      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+      ctx.beginPath(); ctx.moveTo(202, gY + 10); ctx.lineTo(198, gY + 30); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(202, gY + 80); ctx.lineTo(198, gY + 100); ctx.stroke();
+    } else {
+      // Double Glazing (DVH)
+      // Left pane (X = 184 to 190) and Right pane (X = 210 to 216)
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.3)';
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 1;
+      
+      ctx.fillRect(184, gY, 6, gH);
+      ctx.strokeRect(184, gY, 6, gH);
+      
+      ctx.fillRect(210, gY, 6, gH);
+      ctx.strokeRect(210, gY, 6, gH);
+
+      // Gas Cavity interior
+      ctx.fillStyle = glass.id === 'dvh-argon' ? 'rgba(34, 197, 94, 0.05)' : 'rgba(255,255,255,0.01)';
+      ctx.fillRect(190, gY, 20, gH);
+
+      // Lowe Emissivity coating reflection line (yellow neon line inside)
+      if (glass.id === 'dvh-lowe') {
+        ctx.strokeStyle = '#fbbf24'; // Lowe Yellow Neon line
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(191, gY + 2);
+        ctx.lineTo(191, gY + gH - 2);
+        ctx.stroke();
+        
+        ctx.fillStyle = '#fbbf24';
+        ctx.font = 'bold 8px sans-serif';
+        ctx.fillText('Low-E', 154, gY + 35);
+      }
+
+      // Spacer Block (resting at bottom X = 190 to 210, Y = 150 to 170)
+      const spY = 148;
+      const spH = 22;
+      ctx.fillStyle = spacer.id === 'warm-edge' ? '#166534' : '#64748b'; // Warm Edge green vs Aluminum silver
+      ctx.fillRect(190, spY, 20, spH);
+      ctx.strokeStyle = spacer.id === 'warm-edge' ? '#4ade80' : '#94a3b8';
+      ctx.strokeRect(190, spY, 20, spH);
+      // Small dots inside spacer (desiccant)
+      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      for (let dX = 193; dX <= 207; dX += 4) {
+        ctx.fillRect(dX, spY + 5, 2, 2);
+        ctx.fillRect(dX, spY + 14, 2, 2);
+      }
+
+      // Spacer label Psi
+      ctx.fillStyle = spacer.id === 'warm-edge' ? '#4ade80' : '#cbd5e1';
+      ctx.font = 'bold 8px monospace';
+      ctx.fillText(`Ψ = ${spacer.psiValue.toFixed(2)}`, 225, spY + 14);
+    }
+    ctx.restore();
+
+    // 4. DRAW HEAT FLOW ARROWS & LABELS
+    // Interior (Right, warm orange) to Exterior (Left, cold blue)
+    ctx.save();
+    const arrowY = 90;
+    
+    // Calculate path transparency based on insulating performance
+    // Better insulation = thinner/more transparent arrows. High Uw = thick red/orange lines.
+    const heatFlowThickness = Math.max(1, Math.min(8, (uw / 5.8) * 8));
+    const flowAlpha = Math.max(0.2, Math.min(1.0, uw / 5.8));
+
+    // Draw frame heat flow arrow (at Y = 205)
+    ctx.beginPath();
+    ctx.strokeStyle = `rgba(239, 68, 68, ${flowAlpha * 0.8})`; // Red
+    ctx.lineWidth = heatFlowThickness * 0.8;
+    ctx.moveTo(330, 205);
+    ctx.quadraticCurveTo(200, 205, 70, 205);
+    ctx.stroke();
+    // Arrow Head Exterior
+    ctx.fillStyle = `rgba(59, 130, 246, ${flowAlpha})`;
+    ctx.beginPath();
+    ctx.moveTo(70, 205);
+    ctx.lineTo(80, 201);
+    ctx.lineTo(80, 209);
+    ctx.fill();
+
+    // Draw glass heat flow arrow (at Y = 90)
+    ctx.beginPath();
+    ctx.strokeStyle = `rgba(249, 115, 22, ${flowAlpha})`; // Orange
+    ctx.lineWidth = heatFlowThickness;
+    ctx.moveTo(330, arrowY);
+    ctx.bezierCurveTo(250, arrowY, 150, arrowY + 10, 70, arrowY);
+    ctx.stroke();
+    // Arrow Head Exterior
+    ctx.fillStyle = `rgba(59, 130, 246, ${flowAlpha})`;
+    ctx.beginPath();
+    ctx.moveTo(70, arrowY);
+    ctx.lineTo(80, arrowY - 4);
+    ctx.lineTo(80, arrowY + 4);
+    ctx.fill();
+
+    ctx.restore();
+
+    // 5. HUD TEXT LABELS (Dynamic parameters overlay)
+    ctx.save();
+    // Glass Label
+    ctx.fillStyle = '#38bdf8';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.fillText(`Ug = ${glass.uValue.toFixed(1)} W/m²K`, 220, 50);
+    ctx.font = '8px sans-serif';
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText(glass.name, 220, 62);
+
+    // Frame Label
+    ctx.fillStyle = '#f87171';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.fillText(`Uf = ${frame.uValue.toFixed(1)} W/m²K`, 15, fY + 30);
+    ctx.font = '8px sans-serif';
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText(frame.name, 15, fY + 42);
+
+    // Inside / Outside Temperature tags
+    ctx.font = 'bold 10px sans-serif';
+    ctx.fillStyle = '#f97316'; // Orange Inside
+    ctx.textAlign = 'right';
+    ctx.fillText('INTERIOR (Warm)', W - 15, 45);
+    ctx.font = '9px monospace';
+    ctx.fillStyle = '#fb923c';
+    ctx.fillText('Ti = 20 °C', W - 15, 58);
+
+    ctx.font = 'bold 10px sans-serif';
+    ctx.fillStyle = '#3b82f6'; // Blue Outside
+    ctx.textAlign = 'left';
+    ctx.fillText('EXTERIOR (Cold)', 15, 45);
+    ctx.font = '9px monospace';
+    ctx.fillStyle = '#60a5fa';
+    ctx.fillText('Te = 5 °C', 15, 58);
+
+    // Draw active total result box in corner
+    ctx.fillStyle = '#1e293b';
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 1.5;
+    ctx.fillRect(W - 125, H - 45, 110, 32);
+    ctx.strokeRect(W - 125, H - 45, 110, 32);
+
+    ctx.fillStyle = '#38bdf8';
+    ctx.font = 'bold 8px sans-serif';
+    ctx.fillText('GLOBAL RESULT Uw', W - 120, H - 34);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 13px monospace';
+    ctx.fillText(`${uw.toFixed(2)} W/m²K`, W - 120, H - 19);
+
+    ctx.restore();
+  };
+
+  useEffect(() => {
+    drawSchematic();
   }, [inputs, uw]);
 
   const handleInputChange = (e) => {
@@ -275,15 +550,11 @@ export default function WindowCalculator() {
               <span>Esquema Térmico de Cálculo</span>
               <span className="text-[10px] text-gray-500 uppercase tracking-widest">NCh 3137 / ISO 10077</span>
             </h3>
-            <div className="rounded-2xl overflow-hidden border border-white/10 bg-[#0f172a] p-2">
-              <img 
-                src="/window_thermal_diagram.png" 
-                alt="Esquema de Transmitancia Térmica Ventanas" 
-                className="w-full h-auto object-cover rounded-xl"
-              />
+            <div className="rounded-2xl overflow-hidden border border-white/10 bg-[#0f172a] p-2 flex justify-center">
+              <canvas ref={schematicCanvasRef} className="block w-full" style={{ width: '100%', height: '245px', maxWidth: '400px' }}></canvas>
             </div>
             <p className="text-[11px] text-gray-400 leading-relaxed font-sans">
-              El valor global de la ventana {"($U_w$)"} se calcula ponderando las áreas y valores del vidrio {"($U_g$)"} y del marco {"($U_f$)"}, sumando la transmitancia lineal del distanciador de borde (Ψ).
+              El esquema dinámico superior muestra la sección transversal configurada según tus selecciones: tipo de vidrio {"($U_g$)"}, marco {"($U_f$)"} y distanciador (Ψ). El espesor de las flechas ilustra la magnitud del flujo de pérdida de calor.
             </p>
           </div>
 
