@@ -10,25 +10,47 @@ export function calculateUw({
   uf,         // W/m2K
   psi,        // W/mK
   isMetallicWithoutRPT,
-  isSimpleGlass
+  isSimpleGlass,
+  proportionMode = 'frameProfileHeight', // 'directGlassArea', 'frameFactor', 'frameProfileHeight'
+  directGlassArea = 0.09, // m²
+  frameFactor = 0.30 // fraction
 }) {
   const w = width / 1000;
   const h = height / 1000;
-  const fw = frameWidth / 1000;
-
-  // Áreas
   const Aw = w * h;
-  const Ag = (w - 2 * fw) * (h - 2 * fw);
-  const Af = Aw - Ag;
+
+  let Ag = 0;
+  let Af = 0;
+  let fw = 0;
+
+  if (proportionMode === 'directGlassArea') {
+    Ag = Math.max(0, Math.min(Aw, Number(directGlassArea)));
+    Af = Aw - Ag;
+    // Estimar ancho de marco equivalente fw asumiendo misma relación de aspecto de la ventana
+    const r = w / h;
+    const wGlass = Math.sqrt(Ag * r);
+    fw = Math.max(0, (w - wGlass) / 2);
+  } else if (proportionMode === 'frameFactor') {
+    const ff = Math.max(0, Math.min(1, Number(frameFactor)));
+    Af = Aw * ff;
+    Ag = Aw - Af;
+    const r = w / h;
+    const wGlass = Math.sqrt(Ag * r);
+    fw = Math.max(0, (w - wGlass) / 2);
+  } else {
+    // Alternativa estándar 3 (Altura de perfil)
+    fw = frameWidth / 1000;
+    Ag = Math.max(0, (w - 2 * fw) * (h - 2 * fw));
+    Af = Aw - Ag;
+  }
 
   // Perímetro del vidrio
-  const Lg = 2 * ((w - 2 * fw) + (h - 2 * fw));
+  const Lg = 2 * (Math.max(0, w - 2 * fw) + Math.max(0, h - 2 * fw));
 
   // Transmitancia
   let uw = (Ag * ug + Af * uf + Lg * psi) / Aw;
 
   // Alerta de Seguridad DITEC
-  // Si el cálculo de una ventana metálica sin RPT con vidrio simple supera 5.8 W/m2K, debe mostrar 5.8
   if (isMetallicWithoutRPT && isSimpleGlass && uw > 5.8) {
     return 5.8;
   }

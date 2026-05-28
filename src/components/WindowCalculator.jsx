@@ -53,6 +53,22 @@ const MODAL_CONTENT = {
   }
 };
 
+const CONFIGURATIONS = [
+  { id: 'fija', name: '1 Hoja Fija', defaultJointMultiplier: 0 },
+  { id: '1-hoja-abatible', name: '1 Hoja Móvil Lateral', defaultJointMultiplier: 1 },
+  { id: '2-hojas-abatibles', name: '2 Hojas Móviles Laterales', defaultJointMultiplier: 2 },
+  { id: 'corredera-2-hojas', name: 'Corredera de 2 Hojas', defaultJointMultiplier: 1.5 },
+  { id: 'guillotina', name: 'Guillotina', defaultJointMultiplier: 1.8 }
+];
+
+const APERTURE_TYPES = [
+  { id: 'fija', name: 'Fija' },
+  { id: 'abatible', name: 'Abatible' },
+  { id: 'oscilobatiente', name: 'Oscilobatiente' },
+  { id: 'corredera', name: 'Corredera' },
+  { id: 'proyectante', name: 'Proyectante' }
+];
+
 export default function WindowCalculator() {
   const [inputs, setInputs] = useState({
     width: 1500,
@@ -60,10 +76,70 @@ export default function WindowCalculator() {
     frameWidth: 60,
     glassId: 'dvh-aire',
     frameId: 'pvc',
-    spacerId: 'alu'
+    spacerId: 'alu',
+    proportionMode: 'frameProfileHeight', // 'directGlassArea', 'frameFactor', 'frameProfileHeight'
+    directGlassArea: 1.49,
+    frameFactor: 0.20,
+    configId: '2-hojas-abatibles',
+    aberturaId: 'abatible',
+    jointUserValue: ''
   });
 
   const [modal, setModal] = useState({ isOpen: false, key: 'u' });
+
+  // Cálculos derivados en tiempo real
+  const derivedValues = useMemo(() => {
+    const w = inputs.width / 1000;
+    const h = inputs.height / 1000;
+    const Aw = w * h;
+
+    let Ag = 0;
+    let Af = 0;
+    let fw = 0;
+
+    if (inputs.proportionMode === 'directGlassArea') {
+      Ag = Math.max(0, Math.min(Aw, Number(inputs.directGlassArea)));
+      Af = Aw - Ag;
+      const r = w / h;
+      const wGlass = Math.sqrt(Ag * r);
+      fw = Math.max(0, (w - wGlass) / 2);
+    } else if (inputs.proportionMode === 'frameFactor') {
+      const ff = Math.max(0, Math.min(1, Number(inputs.frameFactor)));
+      Af = Aw * ff;
+      Ag = Aw - Af;
+      const r = w / h;
+      const wGlass = Math.sqrt(Ag * r);
+      fw = Math.max(0, (w - wGlass) / 2);
+    } else {
+      fw = inputs.frameWidth / 1000;
+      Ag = Math.max(0, (w - 2 * fw) * (h - 2 * fw));
+      Af = Aw - Ag;
+    }
+
+    // Cálculo matemático del largo de junta operable por defecto
+    let defaultJoint = 0;
+    if (inputs.configId === '1-hoja-abatible') {
+      defaultJoint = 2 * (w + h) - 4 * fw;
+    } else if (inputs.configId === '2-hojas-abatibles') {
+      defaultJoint = 2 * (w + h) + h - 6 * fw;
+    } else if (inputs.configId === 'corredera-2-hojas') {
+      defaultJoint = 2 * w + 3 * h - 6 * fw;
+    } else if (inputs.configId === 'guillotina') {
+      defaultJoint = 3 * w + 2 * h - 6 * fw;
+    }
+    defaultJoint = Math.max(0, Math.round(defaultJoint * 10) / 10);
+
+    const activeJoint = inputs.jointUserValue !== '' ? Number(inputs.jointUserValue) : defaultJoint;
+
+    return {
+      Aw,
+      Ag,
+      Af,
+      fw: Math.round(fw * 1000), // mm para dibujo
+      defaultJoint,
+      activeJoint
+    };
+  }, [inputs]);
 
   const uw = useMemo(() => {
     const glass = GLASS_TYPES.find(g => g.id === inputs.glassId);
@@ -78,7 +154,10 @@ export default function WindowCalculator() {
       uf: frame.uValue,
       psi: spacer.psiValue,
       isMetallicWithoutRPT: frame.material === 'metal' && !frame.rpt,
-      isSimpleGlass: glass.id === 'simple'
+      isSimpleGlass: glass.id === 'simple',
+      proportionMode: inputs.proportionMode,
+      directGlassArea: inputs.directGlassArea,
+      frameFactor: inputs.frameFactor
     });
   }, [inputs]);
 
@@ -176,7 +255,7 @@ export default function WindowCalculator() {
 
     // Glass infill
     ctx.fillStyle = 'rgba(56, 189, 248, 0.08)';
-    const scaledF = Math.max(2, Math.min(8, (inputs.frameWidth / 120) * 8));
+    const scaledF = Math.max(2, Math.min(8, (derivedValues.fw / 120) * 8));
     ctx.fillRect(mX + scaledF, mY + scaledF, mW - 2 * scaledF, mH - 2 * scaledF);
     ctx.strokeStyle = '#334155';
     ctx.lineWidth = 0.5;
@@ -219,7 +298,7 @@ export default function WindowCalculator() {
     ctx.restore();
 
     // Frame Thickness Callout
-    drawTextWithOutline(`Marco: ${inputs.frameWidth}mm`, mX - 5, mY + mH + 22, 'bold 7px monospace', '#f87171');
+    drawTextWithOutline(`Marco: ${derivedValues.fw}mm`, mX - 5, mY + mH + 22, 'bold 7px monospace', '#f87171');
     ctx.restore();
 
     // 2.3 Frame properties card (Left Bottom Y: 148 to 238)
@@ -545,14 +624,12 @@ export default function WindowCalculator() {
 
   useEffect(() => {
     drawSchematic();
-  }, [inputs, uw]);
+  }, [inputs, uw, derivedValues]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setInputs(prev => ({ ...prev, [name]: isNaN(value) ? value : Number(value) }));
   };
-
-  const openModal = (key) => setModal({ isOpen: true, key });
 
   const handlePrint = () => {
     window.print();
@@ -591,23 +668,161 @@ export default function WindowCalculator() {
                 />
               </InputGroup>
             </div>
+            <div className="text-right text-xs text-emerald-400 font-mono">
+              Área total ventana, Aw: <span className="font-bold text-white">{(inputs.width * inputs.height / 1000000).toFixed(2)} m²</span>
+            </div>
 
-            <InputGroup label="Ancho del Marco (mm)" id="frameWidth" onInfo={() => openModal('psi')}>
-              <input
-                id="frameWidth"
-                name="frameWidth"
-                type="number"
-                value={inputs.frameWidth}
-                onChange={handleInputChange}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-              />
-            </InputGroup>
+            {/* Alternativas de Proporción Marco/Vidrio */}
+            <div className="glass p-4 rounded-2xl border border-white/5 space-y-4">
+              <div className="text-xs font-bold text-gray-300 uppercase tracking-wider">Proporción marco vidrio:</div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <label className={`flex items-center gap-1.5 px-2.5 py-2 rounded-xl border text-[10px] font-bold cursor-pointer transition-all ${inputs.proportionMode === 'directGlassArea' ? 'bg-emerald-500/10 border-emerald-500 text-white' : 'bg-white/5 border-white/5 text-gray-400 hover:text-white'}`}>
+                  <input 
+                    type="radio" 
+                    name="proportionMode" 
+                    value="directGlassArea" 
+                    checked={inputs.proportionMode === 'directGlassArea'} 
+                    onChange={(e) => setInputs(prev => ({ ...prev, proportionMode: e.target.value }))}
+                    className="accent-emerald-500"
+                  />
+                  Alternativa 1 (Ag)
+                </label>
+                <label className={`flex items-center gap-1.5 px-2.5 py-2 rounded-xl border text-[10px] font-bold cursor-pointer transition-all ${inputs.proportionMode === 'frameFactor' ? 'bg-emerald-500/10 border-emerald-500 text-white' : 'bg-white/5 border-white/5 text-gray-400 hover:text-white'}`}>
+                  <input 
+                    type="radio" 
+                    name="proportionMode" 
+                    value="frameFactor" 
+                    checked={inputs.proportionMode === 'frameFactor'} 
+                    onChange={(e) => setInputs(prev => ({ ...prev, proportionMode: e.target.value }))}
+                    className="accent-emerald-500"
+                  />
+                  Alternativa 2 (Factor)
+                </label>
+                <label className={`flex items-center gap-1.5 px-2.5 py-2 rounded-xl border text-[10px] font-bold cursor-pointer transition-all ${inputs.proportionMode === 'frameProfileHeight' ? 'bg-emerald-500/10 border-emerald-500 text-white' : 'bg-white/5 border-white/5 text-gray-400 hover:text-white'}`}>
+                  <input 
+                    type="radio" 
+                    name="proportionMode" 
+                    value="frameProfileHeight" 
+                    checked={inputs.proportionMode === 'frameProfileHeight'} 
+                    onChange={(e) => setInputs(prev => ({ ...prev, proportionMode: e.target.value }))}
+                    className="accent-emerald-500"
+                  />
+                  Alternativa 3 (Perfil)
+                </label>
+              </div>
+
+              {inputs.proportionMode === 'directGlassArea' && (
+                <div className="space-y-1.5 pt-2 border-t border-white/5">
+                  <label className="text-xs text-gray-400 font-semibold">Área vidrio, Ag (m²):</label>
+                  <input 
+                    type="number"
+                    step="0.001"
+                    name="directGlassArea"
+                    value={inputs.directGlassArea}
+                    onChange={handleInputChange}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-mono text-xs"
+                  />
+                </div>
+              )}
+
+              {inputs.proportionMode === 'frameFactor' && (
+                <div className="space-y-1.5 pt-2 border-t border-white/5">
+                  <label className="text-xs text-gray-400 font-semibold">Factor de marco (0.00 - 1.00):</label>
+                  <input 
+                    type="number"
+                    step="0.01"
+                    name="frameFactor"
+                    value={inputs.frameFactor}
+                    onChange={handleInputChange}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-mono text-xs"
+                  />
+                </div>
+              )}
+
+              {inputs.proportionMode === 'frameProfileHeight' && (
+                <div className="space-y-1.5 pt-2 border-t border-white/5">
+                  <label className="text-xs text-gray-400 font-semibold">Altura de marco (mm):</label>
+                  <input 
+                    type="number"
+                    name="frameWidth"
+                    value={inputs.frameWidth}
+                    onChange={handleInputChange}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-mono text-xs"
+                  />
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4 pt-2 border-t border-white/5 text-xs text-gray-300 font-mono">
+                <div className="bg-white/5 rounded-xl p-2.5 border border-white/5">
+                  <div className="text-[9px] text-gray-400 uppercase tracking-wider mb-0.5">Área marco, Af:</div>
+                  <div className="text-xs font-bold text-white">{derivedValues.Af.toFixed(3)} m²</div>
+                </div>
+                <div className="bg-white/5 rounded-xl p-2.5 border border-white/5">
+                  <div className="text-[9px] text-gray-400 uppercase tracking-wider mb-0.5">Área vidrio, Ag:</div>
+                  <div className="text-xs font-bold text-white">{derivedValues.Ag.toFixed(3)} m²</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Configuración y Tipo de Abertura */}
+            <div className="glass p-4 rounded-2xl border border-white/5 space-y-4">
+              <div className="text-xs font-bold text-gray-300 uppercase tracking-wider">Junta Operable e Infiltraciones:</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[11px] text-gray-400 font-semibold">Configuración:</label>
+                  <select
+                    name="configId"
+                    value={inputs.configId}
+                    onChange={handleInputChange}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all text-xs cursor-pointer bg-slate-900"
+                  >
+                    {CONFIGURATIONS.map(c => (
+                      <option key={c.id} value={c.id} className="bg-slate-900 text-white">{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[11px] text-gray-400 font-semibold">Tipo abertura:</label>
+                  <select
+                    name="aberturaId"
+                    value={inputs.aberturaId}
+                    onChange={handleInputChange}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all text-xs cursor-pointer bg-slate-900"
+                  >
+                    {APERTURE_TYPES.map(a => (
+                      <option key={a.id} value={a.id} className="bg-slate-900 text-white">{a.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 pt-1">
+                <div>
+                  <div className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Por defecto:</div>
+                  <div className="bg-white/5 border border-white/5 rounded-xl px-4 py-2 text-gray-400 font-mono text-xs">
+                    {derivedValues.defaultJoint.toFixed(1)} m
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Valor usuario:</div>
+                  <input 
+                    type="number"
+                    step="0.1"
+                    name="jointUserValue"
+                    placeholder="Auto..."
+                    value={inputs.jointUserValue}
+                    onChange={handleInputChange}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all font-mono text-xs"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="space-y-4 pt-4">
+          <div className="space-y-4 pt-2">
             <div className="flex items-center gap-2 mb-2">
               <Layers size={18} className="text-emerald-400" />
-              <h2 className="text-lg font-semibold text-white">Materiales</h2>
+              <h2 className="text-lg font-semibold text-white">Materiales de Biblioteca</h2>
             </div>
 
             <InputGroup label="Tipo de Vidrio" id="glassId" onInfo={() => openModal('u')}>
@@ -709,18 +924,25 @@ export default function WindowCalculator() {
             </div>
             <div className="glass p-4 rounded-2xl border border-white/5">
               <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Área Total</p>
-              <p className="text-xl font-mono text-white">{(inputs.width * inputs.height / 1000000).toFixed(2)}</p>
+              <p className="text-xl font-mono text-white">{derivedValues.Aw.toFixed(2)}</p>
               <p className="text-[10px] text-gray-500 font-mono">m²</p>
             </div>
           </div>
 
           {/* Form parameters summary for Print mode */}
           <div className="hidden print:block glass p-6 rounded-2xl border border-white/5 mt-4">
-            <h3 className="text-sm font-bold text-white mb-3">Parámetros del Reporte</h3>
+            <h3 className="text-sm font-bold text-white mb-3">Parámetros del Reporte (Ventana NCh 3137)</h3>
             <table className="w-full text-xs text-gray-300">
               <tbody>
-                <tr className="border-b border-white/5"><td className="py-2">Dimensiones</td><td className="py-2 text-right">{inputs.width} x {inputs.height} mm</td></tr>
-                <tr className="border-b border-white/5"><td className="py-2">Ancho del Marco</td><td className="py-2 text-right">{inputs.frameWidth} mm</td></tr>
+                <tr className="border-b border-white/5"><td className="py-2">Dimensiones</td><td className="py-2 text-right">{inputs.width} x {inputs.height} mm (Aw: {derivedValues.Aw.toFixed(2)} m²)</td></tr>
+                <tr className="border-b border-white/5"><td className="py-2">Proporción Marco/Vidrio</td><td className="py-2 text-right">
+                  {inputs.proportionMode === 'directGlassArea' && `Alternativa 1 (Ag direct: ${inputs.directGlassArea} m²)`}
+                  {inputs.proportionMode === 'frameFactor' && `Alternativa 2 (Factor: ${inputs.frameFactor})`}
+                  {inputs.proportionMode === 'frameProfileHeight' && `Alternativa 3 (Ancho perfil: ${inputs.frameWidth} mm)`}
+                </td></tr>
+                <tr className="border-b border-white/5"><td className="py-2">Áreas Efectivas</td><td className="py-2 text-right">Af: {derivedValues.Af.toFixed(3)} m² | Ag: {derivedValues.Ag.toFixed(3)} m²</td></tr>
+                <tr className="border-b border-white/5"><td className="py-2">Configuración</td><td className="py-2 text-right">{CONFIGURATIONS.find(c => c.id === inputs.configId)?.name} ({APERTURE_TYPES.find(a => a.id === inputs.aberturaId)?.name})</td></tr>
+                <tr className="border-b border-white/5"><td className="py-2">Junta Operable</td><td className="py-2 text-right">Por defecto: {derivedValues.defaultJoint.toFixed(1)} m | Usuario: {inputs.jointUserValue !== '' ? `${inputs.jointUserValue} m` : 'Auto'}</td></tr>
                 <tr className="border-b border-white/5"><td className="py-2">Vidrio</td><td className="py-2 text-right">{GLASS_TYPES.find(g => g.id === inputs.glassId)?.name}</td></tr>
                 <tr className="border-b border-white/5"><td className="py-2">Marco</td><td className="py-2 text-right">{FRAME_TYPES.find(f => f.id === inputs.frameId)?.name}</td></tr>
                 <tr><td className="py-2">Distanciador</td><td className="py-2 text-right">{SPACER_TYPES.find(s => s.id === inputs.spacerId)?.name}</td></tr>
@@ -734,7 +956,7 @@ export default function WindowCalculator() {
               <span>Esquema Térmico de Cálculo</span>
               <span className="text-[10px] text-gray-500 uppercase tracking-widest">NCh 3137 / ISO 10077</span>
             </h3>
-            <div className="rounded-2xl overflow-hidden border border-white/10 bg-[#0f172a] p-2 flex justify-center">
+            <div className="rounded-2xl overflow-hidden border border-white/10 bg-[#070b12] p-2 flex justify-center">
               <canvas ref={schematicCanvasRef} className="block w-full" style={{ width: '100%', height: '245px', maxWidth: '400px' }}></canvas>
             </div>
             <p className="text-[11px] text-gray-400 leading-relaxed font-sans">
@@ -757,7 +979,13 @@ export default function WindowCalculator() {
                 frameWidth: 60,
                 glassId: 'dvh-aire',
                 frameId: 'pvc',
-                spacerId: 'alu'
+                spacerId: 'alu',
+                proportionMode: 'frameProfileHeight',
+                directGlassArea: 1.49,
+                frameFactor: 0.20,
+                configId: '2-hojas-abatibles',
+                aberturaId: 'abatible',
+                jointUserValue: ''
               })}
               className="w-full py-4 bg-white/5 hover:bg-white/10 text-gray-400 rounded-2xl font-semibold flex items-center justify-center gap-2 transition-all border border-white/5 cursor-pointer"
             >
