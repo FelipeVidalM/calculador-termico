@@ -123,7 +123,85 @@ export default function WindowCalculator() {
     // Label coordinates
     ctx.font = '9px monospace';
     ctx.fillStyle = '#475569';
-    ctx.fillText('NCh 3137-1', 15, H - 15);
+    ctx.fillText('NCh 3137-1', 15, 20); // Moved to top-left
+
+    // 1.5 Draw miniature window elevation (bottom-left)
+    const mX = 20;
+    const mY = 145;
+    const mW = 60;
+    const mH = 50;
+
+    ctx.save();
+    // Background of mini-map
+    ctx.fillStyle = 'rgba(30, 41, 59, 0.4)';
+    ctx.fillRect(mX - 5, mY - 12, mW + 45, mH + 34);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(mX - 5, mY - 12, mW + 45, mH + 34);
+
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = 'bold 7px sans-serif';
+    ctx.fillText('MEDIDAS (mm)', mX, mY - 5);
+
+    // Draw outer frame of mini window
+    ctx.strokeStyle = '#64748b';
+    ctx.lineWidth = 2.5;
+    ctx.strokeRect(mX, mY, mW, mH);
+
+    // Glass infill
+    ctx.fillStyle = 'rgba(56, 189, 248, 0.15)';
+    const scaledF = Math.max(2, Math.min(8, (inputs.frameWidth / 120) * 8));
+    ctx.fillRect(mX + scaledF, mY + scaledF, mW - 2 * scaledF, mH - 2 * scaledF);
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(mX + scaledF, mY + scaledF, mW - 2 * scaledF, mH - 2 * scaledF);
+
+    // Dimensional line: Width (W)
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(mX, mY + mH + 4);
+    ctx.lineTo(mX + mW, mY + mH + 4);
+    ctx.stroke();
+    // Arrows for width
+    ctx.fillStyle = '#94a3b8';
+    ctx.beginPath();
+    ctx.moveTo(mX, mY + mH + 4); ctx.lineTo(mX + 3, mY + mH + 2); ctx.lineTo(mX + 3, mY + mH + 6); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(mX + mW, mY + mH + 4); ctx.lineTo(mX + mW - 3, mY + mH + 2); ctx.lineTo(mX + mW - 3, mY + mH + 6); ctx.fill();
+    // Text Width
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(`W:${inputs.width}`, mX + mW/2, mY + mH + 11);
+
+    // Dimensional line: Height (H)
+    ctx.strokeStyle = '#94a3b8';
+    ctx.beginPath();
+    ctx.moveTo(mX - 3, mY);
+    ctx.lineTo(mX - 3, mY + mH);
+    ctx.stroke();
+    // Arrows for height
+    ctx.beginPath();
+    ctx.moveTo(mX - 3, mY); ctx.lineTo(mX - 5, mY + 3); ctx.lineTo(mX - 1, mY + 3); ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(mX - 3, mY + mH); ctx.lineTo(mX - 5, mY + mH - 3); ctx.lineTo(mX - 1, mY + mH - 3); ctx.fill();
+    // Text Height
+    ctx.save();
+    ctx.translate(mX - 7, mY + mH/2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = '7px monospace';
+    ctx.fillText(`H:${inputs.height}`, 0, 2);
+    ctx.restore();
+
+    // Frame Thickness Callout (cota espesor de marco)
+    ctx.fillStyle = '#f87171';
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(`Marco:${inputs.frameWidth}mm`, mX, mY + mH + 19);
+
+    ctx.restore();
 
     // 2. DRAW FRAME (Bottom part: X = 140 to 260, Y = 170 to 240)
     const fX = 140;
