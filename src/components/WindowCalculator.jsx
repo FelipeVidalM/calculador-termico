@@ -269,6 +269,24 @@ export default function WindowCalculator() {
             </table>
           </div>
 
+          {/* Window Thermal Calculation Schematic */}
+          <div className="glass p-6 rounded-3xl border border-white/5 bg-gradient-to-br from-white/5 to-transparent space-y-4">
+            <h3 className="text-sm font-bold text-white flex items-center justify-between">
+              <span>Esquema Térmico de Cálculo</span>
+              <span className="text-[10px] text-gray-500 uppercase tracking-widest">NCh 3137 / ISO 10077</span>
+            </h3>
+            <div className="rounded-2xl overflow-hidden border border-white/10 bg-[#0f172a] p-2">
+              <img 
+                src="/window_thermal_diagram.png" 
+                alt="Esquema de Transmitancia Térmica Ventanas" 
+                className="w-full h-auto object-cover rounded-xl"
+              />
+            </div>
+            <p className="text-[11px] text-gray-400 leading-relaxed font-sans">
+              El valor global de la ventana {"($U_w$)"} se calcula ponderando las áreas y valores del vidrio {"($U_g$)"} y del marco {"($U_f$)"}, sumando la transmitancia lineal del distanciador de borde (Ψ).
+            </p>
+          </div>
+
           <div className="flex flex-col gap-3 print:hidden">
             <button 
               onClick={handlePrint}
