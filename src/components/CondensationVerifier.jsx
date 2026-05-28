@@ -218,8 +218,8 @@ export default function CondensationVerifier() {
           : 'bg-sky-950/20 text-sky-400 hover:bg-sky-950/40 border border-sky-500/25';
       case 'Metales':
         return isActive 
-          ? 'bg-indigo-600 text-white border-indigo-500' 
-          : 'bg-indigo-950/20 text-indigo-400 hover:bg-indigo-950/40 border border-indigo-500/25';
+          ? 'bg-teal-600 text-white border-teal-500' 
+          : 'bg-indigo-950/20 text-teal-400 hover:bg-indigo-950/40 border border-teal-500/25';
       case 'Plásticos y Gomas':
         return isActive 
           ? 'bg-teal-600 text-white border-teal-500' 
@@ -238,7 +238,7 @@ export default function CondensationVerifier() {
           : 'bg-fuchsia-950/20 text-fuchsia-400 hover:bg-fuchsia-950/40 border border-fuchsia-500/25';
       default:
         return isActive 
-          ? 'bg-blue-600 text-white border-blue-500' 
+          ? 'bg-emerald-600 text-white border-emerald-500' 
           : 'bg-white/5 text-gray-300 hover:bg-white/10 border border-white/10';
     }
   };
@@ -348,7 +348,7 @@ export default function CondensationVerifier() {
     ctx.clearRect(0, 0, activeWidth, H);
 
     // Render dark background so it prints perfectly in PDFs too
-    ctx.fillStyle = '#0f172a';
+    ctx.fillStyle = '#070b12';
     ctx.fillRect(0, 0, activeWidth, H);
 
     const B = results.base;
@@ -427,7 +427,7 @@ export default function CondensationVerifier() {
       ctx.beginPath();
       ctx.arc(x, y, 4, 0, 2 * Math.PI);
       ctx.fill();
-      ctx.strokeStyle = '#0f172a';
+      ctx.strokeStyle = '#070b12';
       ctx.lineWidth = 1.5;
       ctx.stroke();
     });
@@ -452,7 +452,7 @@ export default function CondensationVerifier() {
       ctx.beginPath();
       ctx.arc(x, y, 4, 0, 2 * Math.PI);
       ctx.fill();
-      ctx.strokeStyle = '#0f172a';
+      ctx.strokeStyle = '#070b12';
       ctx.lineWidth = 1.5;
       ctx.stroke();
     });
@@ -483,7 +483,7 @@ export default function CondensationVerifier() {
     ctx.clearRect(0, 0, activeWidth, H);
 
     // Solid dark background for PDF print
-    ctx.fillStyle = '#0f172a';
+    ctx.fillStyle = '#070b12';
     ctx.fillRect(0, 0, activeWidth, H);
 
     const B = results.base;
@@ -725,11 +725,11 @@ export default function CondensationVerifier() {
               onClick={() => setActiveStep(idx)}
               className={`flex items-center gap-3 py-3 px-5 border-b-2 text-left transition-all shrink-0 cursor-pointer ${
                 isActive 
-                  ? 'border-blue-500 text-blue-400' 
+                  ? 'border-emerald-500 text-emerald-400' 
                   : 'border-transparent text-gray-500 hover:text-gray-400'
               }`}
             >
-              <div className={`p-2 rounded-lg transition-colors ${isActive ? 'bg-blue-500/10' : 'bg-white/5'}`}>
+              <div className={`p-2 rounded-lg transition-colors ${isActive ? 'bg-emerald-500/10' : 'bg-white/5'}`}>
                 <Icon size={16} />
               </div>
               <div>
@@ -748,7 +748,7 @@ export default function CondensationVerifier() {
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
             <div className="glass p-6 rounded-3xl border border-white/5 space-y-4">
               <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                <span className="p-1 bg-blue-500/10 rounded-lg text-blue-400">📋</span>
+                <span className="p-1 bg-emerald-500/10 rounded-lg text-emerald-400">📋</span>
                 Información del Proyecto
               </h2>
               
@@ -759,7 +759,7 @@ export default function CondensationVerifier() {
                     type="text"
                     value={projectInfo.owner}
                     onChange={(e) => setProjectInfo({ ...projectInfo, owner: e.target.value })}
-                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                     placeholder="Nombre o Institución"
                   />
                 </div>
@@ -769,7 +769,7 @@ export default function CondensationVerifier() {
                     type="text"
                     value={projectInfo.prof}
                     onChange={(e) => setProjectInfo({ ...projectInfo, prof: e.target.value })}
-                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                     placeholder="Nombre del Ingeniero/Arquitecto"
                   />
                 </div>
@@ -779,7 +779,7 @@ export default function CondensationVerifier() {
                     type="text"
                     value={projectInfo.address}
                     onChange={(e) => setProjectInfo({ ...projectInfo, address: e.target.value })}
-                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                     placeholder="Calle, número, oficina"
                   />
                 </div>
@@ -789,7 +789,7 @@ export default function CondensationVerifier() {
                     type="text"
                     value={projectInfo.commune}
                     onChange={(e) => setProjectInfo({ ...projectInfo, commune: e.target.value })}
-                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                     placeholder="Ej: Providencia"
                   />
                 </div>
@@ -799,7 +799,7 @@ export default function CondensationVerifier() {
                     type="text"
                     value={projectInfo.rut}
                     onChange={(e) => setProjectInfo({ ...projectInfo, rut: e.target.value })}
-                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                     placeholder="12.345.678-9"
                   />
                 </div>
@@ -809,7 +809,7 @@ export default function CondensationVerifier() {
                     type="date"
                     value={projectInfo.fecha}
                     onChange={(e) => setProjectInfo({ ...projectInfo, fecha: e.target.value })}
-                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                   />
                 </div>
               </div>
@@ -828,7 +828,7 @@ export default function CondensationVerifier() {
                     type="text"
                     value={projectInfo.descBase}
                     onChange={(e) => setProjectInfo({ ...projectInfo, descBase: e.target.value })}
-                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                   />
                 </div>
                 <div className="flex flex-col gap-1">
@@ -837,7 +837,7 @@ export default function CondensationVerifier() {
                     type="text"
                     value={projectInfo.descProj}
                     onChange={(e) => setProjectInfo({ ...projectInfo, descProj: e.target.value })}
-                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                   />
                 </div>
                 <div className="flex flex-col gap-1">
@@ -845,7 +845,7 @@ export default function CondensationVerifier() {
                   <select
                     value={projectInfo.flowDir}
                     onChange={(e) => setProjectInfo({ ...projectInfo, flowDir: e.target.value })}
-                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer"
+                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer"
                   >
                     <option value="H" className="bg-slate-900">Horizontal (muros) · Rsi=0.13</option>
                     <option value="U" className="bg-slate-900">Ascendente (pisos) · Rsi=0.10</option>
@@ -857,7 +857,7 @@ export default function CondensationVerifier() {
                   <select
                     value={projectInfo.mobiliario}
                     onChange={(e) => setProjectInfo({ ...projectInfo, mobiliario: e.target.value })}
-                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer"
+                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer"
                   >
                     <option value="1" className="bg-slate-900">No — Rsi normal</option>
                     <option value="2" className="bg-slate-900">Sí — Rsi +0.02 m²K/W (muebles adosados)</option>
@@ -866,14 +866,14 @@ export default function CondensationVerifier() {
               </div>
             </div>
 
-            <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl text-blue-400 text-xs">
+            <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-400 text-xs">
               <strong>Nota NCh1973:</strong> Las condiciones fijas de verificación interior corresponden a una temperatura de confort de 19°C y se evalúan frente al mes de Julio (el más desfavorable del invierno en Chile).
             </div>
 
             <div className="flex justify-end">
               <button
                 onClick={() => setActiveStep(1)}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all cursor-pointer flex items-center gap-2"
+                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all cursor-pointer flex items-center gap-2"
               >
                 Siguiente: Clima
                 <span>→</span>
@@ -909,7 +909,7 @@ export default function CondensationVerifier() {
                       });
                       setProjectInfo(prev => ({ ...prev, commune: firstCom }));
                     }}
-                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer text-xs"
+                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer text-xs"
                   >
                     {Object.keys(REGIONES_CHILE).map(r => (
                       <option key={r} value={r} className="bg-slate-900">{r}</option>
@@ -931,7 +931,7 @@ export default function CondensationVerifier() {
                       });
                       setProjectInfo(prev => ({ ...prev, commune: firstCom }));
                     }}
-                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer text-xs"
+                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer text-xs"
                     disabled={!climate.region}
                   >
                     {Object.keys(REGIONES_CHILE[climate.region]?.provincias || {}).map(p => (
@@ -954,7 +954,7 @@ export default function CondensationVerifier() {
                         commune: com
                       }));
                     }}
-                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer text-xs"
+                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer text-xs"
                     disabled={!climate.provincia}
                   >
                     {(REGIONES_CHILE[climate.region]?.provincias[climate.provincia] || []).map(c => (
@@ -973,7 +973,7 @@ export default function CondensationVerifier() {
                           altitud: e.target.value
                         });
                       }}
-                      className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 cursor-pointer text-xs"
+                      className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer text-xs"
                     >
                       <option value="bajo" className="bg-slate-900">Baja / Valle (&lt; 1.000m)</option>
                       <option value="alto" className="bg-slate-900">Alta / Precordillera (&gt;= 1.000m)</option>
@@ -986,7 +986,7 @@ export default function CondensationVerifier() {
               <div className="flex flex-col sm:flex-row items-center gap-6 p-5 bg-white/5 border border-white/5 rounded-2xl">
                 <div className="text-center sm:text-left shrink-0">
                   <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Zona Térmica NCh1079</div>
-                  <div className="text-6xl font-black text-blue-400 mt-1 flex items-center justify-center sm:justify-start gap-3">
+                  <div className="text-6xl font-black text-emerald-400 mt-1 flex items-center justify-center sm:justify-start gap-3">
                     {activeZonaTermica}
                     {climate.altitud === 'alto' && (
                       <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-orange-500/20 text-orange-400 font-bold border border-orange-500/10">
@@ -1035,7 +1035,7 @@ export default function CondensationVerifier() {
 
             <div className="glass p-6 rounded-3xl border border-white/5 space-y-4">
               <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                <span className="p-1 bg-blue-500/10 rounded-lg text-blue-400">💧</span>
+                <span className="p-1 bg-emerald-500/10 rounded-lg text-emerald-400">💧</span>
                 Nivel de Humedad Relativa Interior para Verificación
               </h2>
               <p className="text-sm text-gray-400">
@@ -1066,7 +1066,7 @@ export default function CondensationVerifier() {
               </button>
               <button
                 onClick={() => setActiveStep(2)}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all cursor-pointer flex items-center gap-2"
+                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all cursor-pointer flex items-center gap-2"
               >
                 Siguiente: Capas
                 <span>→</span>
@@ -1083,7 +1083,7 @@ export default function CondensationVerifier() {
               <button
                 onClick={() => setActiveCaseTab('base')}
                 className={`py-2.5 px-4 font-bold text-sm border-b-2 transition-all cursor-pointer ${
-                  activeCaseTab === 'base' ? 'border-blue-500 text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-400'
+                  activeCaseTab === 'base' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-gray-500 hover:text-gray-400'
                 }`}
               >
                 📐 Caso Base
@@ -1091,7 +1091,7 @@ export default function CondensationVerifier() {
               <button
                 onClick={() => setActiveCaseTab('proj')}
                 className={`py-2.5 px-4 font-bold text-sm border-b-2 transition-all cursor-pointer ${
-                  activeCaseTab === 'proj' ? 'border-blue-500 text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-400'
+                  activeCaseTab === 'proj' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-gray-500 hover:text-gray-400'
                 }`}
               >
                 ✏️ Caso Proyectado
@@ -1099,7 +1099,7 @@ export default function CondensationVerifier() {
               <button
                 onClick={() => setActiveCaseTab('bib')}
                 className={`py-2.5 px-4 font-bold text-sm border-b-2 transition-all cursor-pointer ${
-                  activeCaseTab === 'bib' ? 'border-blue-500 text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-400'
+                  activeCaseTab === 'bib' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-gray-500 hover:text-gray-400'
                 }`}
               >
                 📚 Materiales de Usuario
@@ -1109,7 +1109,7 @@ export default function CondensationVerifier() {
             {/* TAB CONTENT: CASO BASE O PROYECTADO */}
             {(activeCaseTab === 'base' || activeCaseTab === 'proj') && (
               <div className="space-y-4">
-                <div className="p-4 bg-blue-500/5 border border-blue-500/10 rounded-2xl text-xs text-blue-400">
+                <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl text-xs text-emerald-400">
                   Las capas se ingresan en orden físico desde el **Exterior (Ext) hacia el Interior (Int)**.
                 </div>
 
@@ -1144,7 +1144,7 @@ export default function CondensationVerifier() {
                                 <div className="font-semibold text-white flex items-center gap-1.5">
                                   {m.n}
                                   {m.barrera && (
-                                    <span className="px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 text-[9px] font-bold">BV</span>
+                                    <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[9px] font-bold">BV</span>
                                   )}
                                 </div>
                                 <div className="text-[10px] text-gray-500 font-mono mt-0.5">
@@ -1158,13 +1158,13 @@ export default function CondensationVerifier() {
                                   min="0.0001"
                                   value={l.e}
                                   onChange={(e) => handleUpdateThickness(activeCaseTab, idx, e.target.value)}
-                                  className="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-center font-mono focus:outline-none focus:border-blue-500 text-white"
+                                  className="w-full bg-white/5 border border-white/10 rounded-lg px-2 py-1 text-center font-mono focus:outline-none focus:border-emerald-500 text-white"
                                 />
                               </td>
                               <td className="py-4 px-4 text-center text-gray-400 font-mono text-xs">
                                 {m.lam != null ? m.lam : (m.R != null ? 'R fijo' : '–')}
                               </td>
-                              <td className="py-4 px-4 text-center text-blue-400 font-semibold font-mono text-xs">
+                              <td className="py-4 px-4 text-center text-emerald-400 font-semibold font-mono text-xs">
                                 {R > 0 ? R.toFixed(3) : '–'}
                               </td>
                               <td className="py-4 px-4 text-center text-gray-400 font-mono text-xs">
@@ -1196,7 +1196,7 @@ export default function CondensationVerifier() {
                   <div className="p-4 bg-white/5 border-t border-white/5 flex justify-start">
                     <button
                       onClick={() => handleOpenLibrary(activeCaseTab)}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs transition-all flex items-center gap-1.5 cursor-pointer"
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition-all flex items-center gap-1.5 cursor-pointer"
                     >
                       <Plus size={14} />
                       Agregar capa desde biblioteca
@@ -1239,7 +1239,7 @@ export default function CondensationVerifier() {
               <div className="space-y-6">
                 <div className="glass p-6 rounded-3xl border border-white/5 space-y-4">
                   <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    <span className="p-1 bg-blue-500/10 rounded-lg text-blue-400"><Sparkles size={14} /></span>
+                    <span className="p-1 bg-emerald-500/10 rounded-lg text-emerald-400"><Sparkles size={14} /></span>
                     Agregar nuevo material personalizado
                   </h3>
                   
@@ -1251,7 +1251,7 @@ export default function CondensationVerifier() {
                         name="n"
                         value={customMatForm.n}
                         onChange={handleCustomMaterialInputChange}
-                        className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                        className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                         placeholder="Ej: Aislante local de paja"
                       />
                     </div>
@@ -1263,7 +1263,7 @@ export default function CondensationVerifier() {
                         name="lam"
                         value={customMatForm.lam}
                         onChange={handleCustomMaterialInputChange}
-                        className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                        className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                         placeholder="Dejar vacío si es barrera fina o cámara"
                       />
                     </div>
@@ -1275,7 +1275,7 @@ export default function CondensationVerifier() {
                         name="e"
                         value={customMatForm.e}
                         onChange={handleCustomMaterialInputChange}
-                        className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                        className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-2">
@@ -1303,7 +1303,7 @@ export default function CondensationVerifier() {
                           name="val"
                           value={customMatForm.val}
                           onChange={handleCustomMaterialInputChange}
-                          className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                          className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                           placeholder="0.0"
                         />
                       </div>
@@ -1312,7 +1312,7 @@ export default function CondensationVerifier() {
 
                   {/* Diffusion conversion display */}
                   <div className="p-3 bg-white/5 rounded-2xl text-xs text-gray-400 flex items-center gap-2">
-                    <HelpCircle size={14} className="text-blue-400" />
+                    <HelpCircle size={14} className="text-emerald-400" />
                     <span>
                       Conversión NCh 1973: {
                         convertedMuValue != null
@@ -1325,7 +1325,7 @@ export default function CondensationVerifier() {
                   <div className="flex justify-start">
                     <button
                       onClick={handleAddUserMaterial}
-                      className="px-5 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs transition-all cursor-pointer"
+                      className="px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition-all cursor-pointer"
                     >
                       Guardar Material en Lista
                     </button>
@@ -1360,7 +1360,7 @@ export default function CondensationVerifier() {
                               <td className="py-3 px-4 text-center font-mono text-xs">{matMuDisp(m)}</td>
                               <td className="py-3 px-4 text-center">
                                 {m.barrera ? (
-                                  <span className="px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 text-[10px] font-bold">Barrera</span>
+                                  <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">Barrera</span>
                                 ) : 'No'}
                               </td>
                               <td className="py-3 px-4 text-center">
@@ -1390,7 +1390,7 @@ export default function CondensationVerifier() {
               </button>
               <button
                 onClick={() => setActiveStep(3)}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-all cursor-pointer flex items-center gap-2"
+                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all cursor-pointer flex items-center gap-2"
               >
                 Calcular y Ver Resultados
                 <span>→</span>
@@ -1408,7 +1408,7 @@ export default function CondensationVerifier() {
               <button
                 onClick={() => setActiveResultTab('sup')}
                 className={`py-2.5 px-4 font-bold text-sm border-b-2 transition-all cursor-pointer ${
-                  activeResultTab === 'sup' ? 'border-blue-500 text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-400'
+                  activeResultTab === 'sup' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-gray-500 hover:text-gray-400'
                 }`}
               >
                 🌡️ Superficial
@@ -1416,7 +1416,7 @@ export default function CondensationVerifier() {
               <button
                 onClick={() => setActiveResultTab('int')}
                 className={`py-2.5 px-4 font-bold text-sm border-b-2 transition-all cursor-pointer ${
-                  activeResultTab === 'int' ? 'border-blue-500 text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-400'
+                  activeResultTab === 'int' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-gray-500 hover:text-gray-400'
                 }`}
               >
                 💧 Intersticial
@@ -1424,7 +1424,7 @@ export default function CondensationVerifier() {
               <button
                 onClick={() => setActiveResultTab('graf')}
                 className={`py-2.5 px-4 font-bold text-sm border-b-2 transition-all cursor-pointer ${
-                  activeResultTab === 'graf' ? 'border-blue-500 text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-400'
+                  activeResultTab === 'graf' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-gray-500 hover:text-gray-400'
                 }`}
               >
                 📊 Perfiles Gráficos
@@ -1432,7 +1432,7 @@ export default function CondensationVerifier() {
               <button
                 onClick={() => setActiveResultTab('conc')}
                 className={`py-2.5 px-4 font-bold text-sm border-b-2 transition-all cursor-pointer ${
-                  activeResultTab === 'conc' ? 'border-blue-500 text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-400'
+                  activeResultTab === 'conc' ? 'border-emerald-500 text-emerald-400' : 'border-transparent text-gray-500 hover:text-gray-400'
                 }`}
               >
                 ✅ Conclusiones NCh
@@ -1521,7 +1521,7 @@ export default function CondensationVerifier() {
                       <tbody className="divide-y divide-white/5 text-gray-300">
                         <tr>
                           <td className="py-4 px-4 font-semibold text-white">Caso Base</td>
-                          <td className="py-4 px-4 text-center font-mono text-blue-400 font-bold">{results.base.RT.toFixed(3)}</td>
+                          <td className="py-4 px-4 text-center font-mono text-emerald-400 font-bold">{results.base.RT.toFixed(3)}</td>
                           <td className="py-4 px-4 text-center font-mono">{results.base.supRes[0].RT_min.toFixed(3)}</td>
                           <td className="py-4 px-4 text-center font-mono">{results.base.supRes[1].RT_min.toFixed(3)}</td>
                           <td className="py-4 px-4 text-center font-mono">{results.base.supRes[2].RT_min.toFixed(3)}</td>
@@ -1647,13 +1647,13 @@ export default function CondensationVerifier() {
                       <span>Perfil de Gradiente de Temperatura</span>
                       <span className="text-[10px] text-gray-500 uppercase tracking-widest">Exterior → Interior</span>
                     </h3>
-                    <div className="p-2 bg-[#0f172a] border border-white/5 rounded-2xl overflow-hidden relative">
+                    <div className="p-2 bg-[#070b12] border border-white/5 rounded-2xl overflow-hidden relative">
                       <canvas ref={tempCanvasRef} className="block w-full" style={{ width: '100%', height: '210px' }}></canvas>
                     </div>
                     {/* Legend */}
                     <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-[10px] text-gray-400">
                       <div className="flex items-center gap-1.5">
-                        <div className="w-4 h-1 bg-blue-500 rounded-sm"></div>
+                        <div className="w-4 h-1 bg-emerald-500 rounded-sm"></div>
                         <span>T° Caso Base</span>
                       </div>
                       <div className="flex items-center gap-1.5">
@@ -1673,13 +1673,13 @@ export default function CondensationVerifier() {
                       <span>Presión de Vapor vs Saturación (Glaser)</span>
                       <span className="text-[10px] text-gray-500 uppercase tracking-widest">Exterior → Interior</span>
                     </h3>
-                    <div className="p-2 bg-[#0f172a] border border-white/5 rounded-2xl overflow-hidden">
+                    <div className="p-2 bg-[#070b12] border border-white/5 rounded-2xl overflow-hidden">
                       <canvas ref={pressCanvasRef} className="block w-full" style={{ width: '100%', height: '210px' }}></canvas>
                     </div>
                     {/* Legend */}
                     <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-[10px] text-gray-400 font-sans">
                       <div className="flex items-center gap-1.5">
-                        <div className="w-4 h-1 bg-blue-500/50 rounded-sm"></div>
+                        <div className="w-4 h-1 bg-emerald-500/50 rounded-sm"></div>
                         <span>Psat Base</span>
                       </div>
                       <div className="flex items-center gap-1.5">
@@ -1883,7 +1883,7 @@ export default function CondensationVerifier() {
                 <div className="flex gap-3 print:hidden">
                   <button
                     onClick={() => window.print()}
-                    className="px-5 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs transition-all flex items-center gap-1.5 cursor-pointer"
+                    className="px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs transition-all flex items-center gap-1.5 cursor-pointer"
                   >
                     <Printer size={14} />
                     Imprimir Reporte Completo / PDF
@@ -1967,7 +1967,7 @@ export default function CondensationVerifier() {
                   type="text"
                   value={bibSearch}
                   onChange={(e) => setBibSearch(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
                   placeholder="Buscar por nombre, fuente o grupo..."
                 />
               </div>
@@ -1978,7 +1978,7 @@ export default function CondensationVerifier() {
                   onClick={() => setBibFilterG('')}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer transition-all border shadow-sm ${
                     !bibFilterG 
-                      ? 'bg-blue-600 text-white border-blue-500 shadow-blue-500/20' 
+                      ? 'bg-emerald-600 text-white border-emerald-500 shadow-emerald-500/20' 
                       : 'bg-white/5 text-gray-300 border-white/10 hover:text-white hover:bg-white/10'
                   }`}
                 >
@@ -2023,10 +2023,10 @@ export default function CondensationVerifier() {
                       className="p-3 hover:bg-white/5 cursor-pointer transition-colors flex justify-between items-center group text-left"
                     >
                       <div className="space-y-1">
-                        <div className="font-semibold text-white text-xs group-hover:text-blue-400 flex items-center gap-1.5 flex-wrap">
+                        <div className="font-semibold text-white text-xs group-hover:text-emerald-400 flex items-center gap-1.5 flex-wrap">
                           {m.n}
                           {m.barrera && (
-                            <span className="px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 text-[8px] font-bold">BV</span>
+                            <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[8px] font-bold">BV</span>
                           )}
                           <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold border transition-colors ${catColorClass}`}>
                             {cat}

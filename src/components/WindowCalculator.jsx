@@ -103,10 +103,10 @@ export default function WindowCalculator() {
     ctx.scale(dpr, dpr);
 
     // 1. Background & Technical Grid
-    ctx.fillStyle = '#0b0f19';
+    ctx.fillStyle = '#09110d';
     ctx.fillRect(0, 0, W, H);
 
-    ctx.strokeStyle = 'rgba(56, 189, 248, 0.02)';
+    ctx.strokeStyle = 'rgba(16, 185, 129, 0.015)';
     ctx.lineWidth = 0.8;
     for (let x = 0; x < W; x += 20) {
       ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
@@ -565,7 +565,7 @@ export default function WindowCalculator() {
         <div className="space-y-6 print:hidden">
           <div className="space-y-4">
             <div className="flex items-center gap-2 mb-2">
-              <Settings size={18} className="text-blue-400" />
+              <Settings size={18} className="text-emerald-400" />
               <h2 className="text-lg font-semibold text-white">Parámetros de Diseño</h2>
             </div>
             
@@ -577,7 +577,7 @@ export default function WindowCalculator() {
                   type="number"
                   value={inputs.width}
                   onChange={handleInputChange}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </InputGroup>
               <InputGroup label="Alto (mm)" id="height" onInfo={() => openModal('inercia')}>
@@ -587,7 +587,7 @@ export default function WindowCalculator() {
                   type="number"
                   value={inputs.height}
                   onChange={handleInputChange}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </InputGroup>
             </div>
@@ -599,14 +599,14 @@ export default function WindowCalculator() {
                 type="number"
                 value={inputs.frameWidth}
                 onChange={handleInputChange}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
             </InputGroup>
           </div>
 
           <div className="space-y-4 pt-4">
             <div className="flex items-center gap-2 mb-2">
-              <Layers size={18} className="text-blue-400" />
+              <Layers size={18} className="text-emerald-400" />
               <h2 className="text-lg font-semibold text-white">Materiales</h2>
             </div>
 
@@ -616,7 +616,7 @@ export default function WindowCalculator() {
                 name="glassId"
                 value={inputs.glassId}
                 onChange={handleInputChange}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all appearance-none cursor-pointer"
               >
                 {GLASS_TYPES.map(g => (
                   <option key={g.id} value={g.id} className="bg-slate-900 text-white">{g.name}</option>
@@ -630,7 +630,7 @@ export default function WindowCalculator() {
                 name="frameId"
                 value={inputs.frameId}
                 onChange={handleInputChange}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all appearance-none cursor-pointer"
               >
                 {FRAME_TYPES.map(f => (
                   <option key={f.id} value={f.id} className="bg-slate-900 text-white">{f.name}</option>
@@ -644,7 +644,7 @@ export default function WindowCalculator() {
                 name="spacerId"
                 value={inputs.spacerId}
                 onChange={handleInputChange}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all appearance-none cursor-pointer"
               >
                 {SPACER_TYPES.map(s => (
                   <option key={s.id} value={s.id} className="bg-slate-900 text-white">{s.name}</option>
@@ -658,7 +658,7 @@ export default function WindowCalculator() {
         <div className="flex flex-col gap-6 print:w-full">
           <motion.div 
             layout
-            className="glass p-8 rounded-3xl flex flex-col items-center justify-center text-center relative overflow-hidden group border border-blue-500/20"
+            className="glass p-8 rounded-3xl flex flex-col items-center justify-center text-center relative overflow-hidden group border border-emerald-500/20"
           >
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity print:hidden">
               <Calculator size={80} className="text-white" />
@@ -673,11 +673,11 @@ export default function WindowCalculator() {
                 key={uw}
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                className="text-7xl font-black bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent tracking-tighter"
+                className="text-7xl font-black bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent tracking-tighter"
               >
                 {uw}
               </motion.span>
-              <span className="text-xl font-bold text-blue-400 ml-2">W/m²K</span>
+              <span className="text-xl font-bold text-emerald-400 ml-2">W/m²K</span>
             </div>
 
             <p className="mt-6 text-gray-400 text-sm leading-relaxed max-w-[280px]">
@@ -745,7 +745,7 @@ export default function WindowCalculator() {
           <div className="flex flex-col gap-3 print:hidden">
             <button 
               onClick={handlePrint}
-              className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-600/20 active:scale-95 cursor-pointer"
+              className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-600/20 active:scale-95 cursor-pointer"
             >
               Generar Reporte PDF / Imprimir
               <ArrowRight size={18} />
@@ -771,8 +771,8 @@ export default function WindowCalculator() {
       {/* Info Banner */}
       <section className="glass p-6 rounded-2xl border border-white/5 bg-gradient-to-br from-white/5 to-transparent print:hidden">
         <div className="flex gap-4 items-start">
-          <div className="p-3 bg-blue-500/10 rounded-xl shrink-0">
-            <Info className="text-blue-400" size={24} />
+          <div className="p-3 bg-emerald-500/10 rounded-xl shrink-0">
+            <Info className="text-emerald-400" size={24} />
           </div>
           <div>
             <h3 className="font-bold text-white mb-1">Nota Técnica</h3>
