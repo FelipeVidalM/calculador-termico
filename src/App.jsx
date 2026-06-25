@@ -1,18 +1,20 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Flame, 
+import {
+  Flame,
   Layers,
   ThermometerSnowflake,
   Activity,
-  Wind
+  Wind,
+  Building2
 } from 'lucide-react';
 import WindowCalculator from './components/WindowCalculator';
 import CondensationVerifier from './components/CondensationVerifier';
 import VentilationCalculator from './components/VentilationCalculator';
+import TransmittanceCalculator from './components/TransmittanceCalculator';
 
 function App() {
-  const [activeBlock, setActiveBlock] = useState('window'); // 'window', 'condensation', or 'ventilation'
+  const [activeBlock, setActiveBlock] = useState('window'); // 'window', 'transmittance', 'condensation', 'ventilation'
   const [sharedProject, setSharedProject] = useState({
     owner: '',
     prof: '',
@@ -81,6 +83,22 @@ function App() {
               )}
             </button>
             <button
+              onClick={() => setActiveBlock('transmittance')}
+              className={`relative z-10 px-4 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-2 cursor-pointer ${
+                activeBlock === 'transmittance' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Building2 size={14} className={activeBlock === 'transmittance' ? 'text-emerald-200' : ''} />
+              Transmitancia de Elementos
+              {activeBlock === 'transmittance' && (
+                <motion.div
+                  layoutId="activeBlockIndicator"
+                  className="absolute inset-0 bg-emerald-800 rounded-xl -z-10 shadow-lg shadow-emerald-800/10 border border-emerald-600/20"
+                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                />
+              )}
+            </button>
+            <button
               onClick={() => setActiveBlock('ventilation')}
               className={`relative z-10 px-4 py-2.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-2 cursor-pointer ${
                 activeBlock === 'ventilation' ? 'text-white' : 'text-slate-600 hover:text-slate-900'
@@ -113,7 +131,12 @@ function App() {
           <h1 className="text-2xl font-bold">REPORTE TÉRMICO PROFESIONAL</h1>
           <p className="text-sm font-mono mt-1">NRT INGENIERÍA SUSTENTABLE Y EFICIENCIA ENERGÉTICA</p>
           <p className="text-xs text-gray-600 mt-0.5">
-            Cálculo Oficial: {activeBlock === 'window' ? 'Transmitancia Térmica de Ventana (NCh 3137)' : activeBlock === 'condensation' ? 'Verificación de Condensaciones en Envolvente (NCh 1973 · DITEC)' : 'Cálculo de Ventilación en Viviendas (NCh 3309)'}
+            Cálculo Oficial: {
+              activeBlock === 'window'        ? 'Transmitancia Térmica de Ventana (NCh 3137)' :
+              activeBlock === 'transmittance' ? 'Transmitancia Térmica de Elementos Constructivos (NCh853.Of2021)' :
+              activeBlock === 'condensation'  ? 'Verificación de Condensaciones en Envolvente (NCh 1973 · DITEC)' :
+              'Cálculo de Ventilación en Viviendas (NCh 3309)'
+            }
           </p>
         </div>
 
@@ -126,6 +149,9 @@ function App() {
             transition={{ duration: 0.2 }}
           >
             {activeBlock === 'window' && <WindowCalculator />}
+            {activeBlock === 'transmittance' && (
+              <TransmittanceCalculator sharedProject={sharedProject} setSharedProject={setSharedProject} />
+            )}
             {activeBlock === 'condensation' && (
               <CondensationVerifier sharedProject={sharedProject} setSharedProject={setSharedProject} />
             )}
