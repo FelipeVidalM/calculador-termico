@@ -16,7 +16,7 @@ import {
   HelpCircle,
   X
 } from 'lucide-react';
-import { BIBLIOTECA, DATOS_CLIMA, PZ, RSI, RSE, delta0, REGIONES_CHILE, COMUNAS_CON_ALTITUD } from '../lib/condConstants';
+import { BIBLIOTECA, DATOS_CLIMA, PZ, RSI, RSE, delta0, REGIONES_CHILE, COMUNAS_CON_ALTITUD, U_MAX_OGUC, ELEM_TYPES } from '../lib/condConstants';
 import { pSat, Tdew, calcCase, matR, matSd, matMuDisp } from '../lib/condPhysics';
 import InputGroup from './InputGroup';
 
@@ -41,7 +41,7 @@ export default function CondensationVerifier({ sharedProject, setSharedProject }
     pda: '',
     descBase: 'Muro de albañilería existente',
     descProj: 'Muro con aislación térmica EIFS',
-    flowDir: 'H', // Horizontal (muros)
+    elemType: 'muro', // muro | techo | piso
     mobiliario: '2' // Rsi + 0.02
   });
 
@@ -112,12 +112,14 @@ export default function CondensationVerifier({ sharedProject, setSharedProject }
     return baseWeather;
   }, [climate.provincia, climate.altitud]);
 
+  const activeElemType = useMemo(() => {
+    return ELEM_TYPES.find(e => e.id === projectInfo.elemType) || ELEM_TYPES[0];
+  }, [projectInfo.elemType]);
+
   const activeRsi = useMemo(() => {
-    const dir = projectInfo.flowDir;
-    const mob = projectInfo.mobiliario;
-    const baseRsi = RSI[dir] || 0.13;
-    return baseRsi + (mob === '2' ? 0.02 : 0);
-  }, [projectInfo.flowDir, projectInfo.mobiliario]);
+    const baseRsi = RSI[activeElemType.rsiKey] || 0.13;
+    return baseRsi + (projectInfo.mobiliario === '2' ? 0.02 : 0);
+  }, [activeElemType, projectInfo.mobiliario]);
 
   // User Defined Materials State
   const [userMats, setUserMats] = useState([]);
@@ -326,6 +328,22 @@ export default function CondensationVerifier({ sharedProject, setSharedProject }
 
     return { base, proj };
   }, [layersBase, layersProj, activeWeatherData, activeRsi, allMaterials, HRi_list]);
+
+  // Exigencia térmica OGUC
+  const ogucCheck = useMemo(() => {
+    const zona = activeZonaTermica;
+    const elemKey = activeElemType.id;
+    const uMax = U_MAX_OGUC[zona]?.[elemKey] ?? null;
+    const uBase = results ? 1 / results.base.RT : null;
+    const uProj = results ? 1 / results.proj.RT : null;
+    return {
+      uMax,
+      uBase,
+      uProj,
+      cumpleBase: uMax != null && uBase != null ? uBase <= uMax : null,
+      cumpleProj: uMax != null && uProj != null ? uProj <= uMax : null,
+    };
+  }, [activeZonaTermica, activeElemType, results]);
 
   // Step 3: Results Sub-tabs
   const [activeResultTab, setActiveResultTab] = useState('sup'); // sup, int, graf, conc
@@ -872,15 +890,15 @@ export default function CondensationVerifier({ sharedProject, setSharedProject }
                   />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Dirección de Flujo de Calor</label>
+                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tipo de Elemento Constructivo</label>
                   <select
-                    value={projectInfo.flowDir}
-                    onChange={(e) => setProjectInfo({ ...projectInfo, flowDir: e.target.value })}
+                    value={projectInfo.elemType}
+                    onChange={(e) => setProjectInfo({ ...projectInfo, elemType: e.target.value })}
                     className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 cursor-pointer"
                   >
-                    <option value="H" className="bg-white text-slate-800">Horizontal (muros) · Rsi=0.13</option>
-                    <option value="U" className="bg-white text-slate-800">Ascendente (pisos) · Rsi=0.10</option>
-                    <option value="D" className="bg-white text-slate-800">Descendente (techos/cielos) · Rsi=0.17</option>
+                    <option value="muro"  className="bg-white text-slate-800">Muro — flujo horizontal · Rsi=0.13 m²K/W</option>
+                    <option value="techo" className="bg-white text-slate-800">Techo — flujo ascendente · Rsi=0.10 m²K/W</option>
+                    <option value="piso"  className="bg-white text-slate-800">Piso ventilado — flujo descendente · Rsi=0.17 m²K/W</option>
                   </select>
                 </div>
                 <div className="flex flex-col gap-1">
@@ -1262,6 +1280,35 @@ export default function CondensationVerifier({ sharedProject, setSharedProject }
                     </div>
                   </div>
                 </div>
+
+                {/* Exigencia térmica OGUC */}
+                {ogucCheck.uMax != null && (
+                  <div className={`rounded-2xl border p-4 flex flex-col sm:flex-row sm:items-center gap-4 ${
+                    activeCaseTab === 'proj'
+                      ? ogucCheck.cumpleProj ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'
+                      : ogucCheck.cumpleBase ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'
+                  }`}>
+                    <div className="flex-1">
+                      <div className="text-[10px] font-bold uppercase text-slate-500 mb-1">
+                        Exigencia Térmica OGUC — Zona {activeZonaTermica} · {activeElemType.label}
+                      </div>
+                      <div className="text-sm font-semibold text-slate-800">
+                        U máximo exigido: <span className="font-mono font-bold">{ogucCheck.uMax.toFixed(2)} W/m²K</span>
+                        <span className="mx-2 text-slate-400">·</span>
+                        U obtenido ({activeCaseTab === 'proj' ? 'proyectado' : 'base'}): <span className="font-mono font-bold">{(activeCaseTab === 'proj' ? ogucCheck.uProj : ogucCheck.uBase)?.toFixed(3)} W/m²K</span>
+                      </div>
+                    </div>
+                    <div className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-black ${
+                      (activeCaseTab === 'proj' ? ogucCheck.cumpleProj : ogucCheck.cumpleBase)
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-red-600 text-white'
+                    }`}>
+                      {(activeCaseTab === 'proj' ? ogucCheck.cumpleProj : ogucCheck.cumpleBase)
+                        ? '✓ Cumple NCh853'
+                        : '✗ No cumple NCh853'}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -1842,9 +1889,30 @@ export default function CondensationVerifier({ sharedProject, setSharedProject }
                           </td>
                         </tr>
                         <tr>
-                          <td className="py-3 px-4 font-sans font-semibold text-slate-800">Transmitancia Térmica {"($U$)"}</td>
-                          <td className="py-3 px-4 text-center font-mono">{(1/results.base.RT).toFixed(3)} W/m²K</td>
-                          <td className="py-3 px-4 text-center font-mono">{(1/results.proj.RT).toFixed(3)} W/m²K</td>
+                          <td className="py-3 px-4 font-sans font-semibold text-slate-800">
+                            Transmitancia Térmica {"($U$)"}
+                            {ogucCheck.uMax != null && (
+                              <span className="ml-1 text-[10px] font-normal text-slate-500">
+                                (máx OGUC: {ogucCheck.uMax.toFixed(2)} W/m²K)
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-3 px-4 text-center font-mono">
+                            {ogucCheck.uBase?.toFixed(3)} W/m²K
+                            {ogucCheck.uMax != null && (
+                              <span className={`ml-1 px-1.5 py-0.5 rounded text-[9px] font-bold ${ogucCheck.cumpleBase ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                                {ogucCheck.cumpleBase ? '✓' : '✗'}
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-3 px-4 text-center font-mono">
+                            {ogucCheck.uProj?.toFixed(3)} W/m²K
+                            {ogucCheck.uMax != null && (
+                              <span className={`ml-1 px-1.5 py-0.5 rounded text-[9px] font-bold ${ogucCheck.cumpleProj ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                                {ogucCheck.cumpleProj ? '✓' : '✗'}
+                              </span>
+                            )}
+                          </td>
                           <td className="py-3 px-4 text-center font-sans">
                             {results.proj.RT > results.base.RT ? (
                               <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-100 text-[10px] font-bold">Disminuye Pérdida</span>
