@@ -44,6 +44,200 @@ const RU_OPTIONS = [
 const MAX_LAYERS = 7;
 const GROUPS = [...new Set(BIBLIOTECA.map(m => m.g))];
 
+// ── Color por tipo de material ────────────────────────────────────────────────
+function matColor(mat) {
+  if (!mat) return '#e2e8f0';
+  const n = mat.n.toLowerCase();
+  const dark = '#1e293b';
+  // Aislantes térmicos → azules
+  if (/eps|xps|aislagreen/.test(n))                         return ['#bfdbfe', dark];
+  if (/lana.*(vidrio|mineral|aislanglass|oveja)/.test(n))   return ['#cffafe', dark];
+  if (/poliuretano|celulosa|fibra de poli|corcho/.test(n))  return ['#d1fae5', dark];
+  // Maderas y tableros → cálidos
+  if (/pino|madera/.test(n))                                return ['#fed7aa', dark];
+  if (/osb|mdf|contrachap|terciado|placa de madera|enchape de madera/.test(n)) return ['#fdba74', dark];
+  // Hormigón y mampostería → grises
+  if (/hormigón|hormigon/.test(n))                          return ['#d1d5db', dark];
+  if (/ladrillo|adobe/.test(n))                             return ['#fca5a5', dark];
+  if (/roca|piedra|basalto|granito|mármol/.test(n))         return ['#94a3b8', '#fff'];
+  // Morteros, estucos, revoques → ocre claro
+  if (/mortero|estuco|revoque|cemento arena|cal arena|enlucido/.test(n)) return ['#fef08a', dark];
+  // Yeso
+  if (/yeso/.test(n))                                       return ['#fef9c3', dark];
+  // Fibrocementos → indigo suave
+  if (/fibrocemento|fibrosilicato/.test(n))                 return ['#c7d2fe', dark];
+  // Enchapes y cerámicos → rosado
+  if (/enchape|cerámic|porcelana|baldosa|piso flotante/.test(n)) return ['#fecdd3', dark];
+  // Metales → gris azulado
+  if (/acero|aluminio|cobre|zinc|hierro|bronce|latón/.test(n)) return ['#cbd5e1', dark];
+  // Vidrio y cámaras de aire
+  if (/vidrio|cámara/.test(n))                              return ['#e0f2fe', dark];
+  // Asfalto y bitumen → oscuro
+  if (/asfalto|bitumen|impermeab/.test(n))                  return ['#334155', '#fff'];
+  // Barreras vapor y membranas → lila
+  if (/polietileno|volcán|volcanwrap|tyvek|typro|klober|fieltro|superfieltro/.test(n)) return ['#e9d5ff', dark];
+  // Pinturas y papeles → muy claro
+  if (/pintura|barniz|papel/.test(n))                       return ['#f8fafc', dark];
+  // Capas delgadas R=0 → gris muy suave
+  if (mat.R === 0)                                          return ['#f1f5f9', dark];
+  // Default
+  return ['#a7f3d0', dark];
+}
+
+// ── Diagrama SVG de sección transversal ──────────────────────────────────────
+function LayerDiagram({ layers, layerData, elemType }) {
+  const validPairs = layers
+    .map((l, i) => ({ l, i, ld: layerData[i] }))
+    .filter(({ l, ld }) => l.mat && ld?.ok && ld.r !== null);
+
+  if (validPairs.length === 0) return null;
+
+  const VB_W = 720, VB_H = 240;
+  const ENV_W = 64;          // ancho zona ambiental
+  const LAYER_X = ENV_W;
+  const LAYER_W = VB_W - ENV_W * 2;
+  const LAYER_Y = 28;
+  const LAYER_H = 162;
+  const LABEL_Y = VB_H - 10;
+
+  // Ancho proporcional al max(R, mínimo visual)
+  const MIN_R = 0.004;
+  const rawRs = validPairs.map(({ ld }) => Math.max(ld.r, MIN_R));
+  const totalR = rawRs.reduce((a, b) => a + b, 0);
+  const MIN_PX = 16;
+  const rawPxs = rawRs.map(r => (r / totalR) * LAYER_W);
+  const adjPxs = rawPxs.map(w => Math.max(w, MIN_PX));
+  const adjTotal = adjPxs.reduce((a, b) => a + b, 0);
+  const finalPxs = adjPxs.map(w => (w / adjTotal) * LAYER_W);
+
+  // Texto abreviado
+  const abbr = (s, max = 22) => s.length > max ? s.slice(0, max - 1) + '…' : s;
+
+  const ELEM_LABELS = { muro: 'Muro', techo: 'Techo / Cubierta', piso: 'Piso ventilado' };
+
+  return (
+    <div className="mt-5 rounded-2xl overflow-hidden border border-black/8 bg-white shadow-sm">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-4 pt-3 pb-1">
+        Sección Transversal — {ELEM_LABELS[elemType] || elemType} (exterior → interior)
+      </p>
+      <svg
+        width="100%"
+        viewBox={`0 0 ${VB_W} ${VB_H}`}
+        xmlns="http://www.w3.org/2000/svg"
+        style={{ display: 'block' }}
+      >
+        {/* ── Zona Exterior ── */}
+        <defs>
+          <pattern id="hatchExt" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
+            <line x1="0" y1="0" x2="0" y2="8" stroke="#93c5fd" strokeWidth="2"/>
+          </pattern>
+          <pattern id="hatchInt" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
+            <line x1="0" y1="0" x2="0" y2="8" stroke="#fcd34d" strokeWidth="2"/>
+          </pattern>
+        </defs>
+
+        {/* Exterior background */}
+        <rect x="0" y={LAYER_Y} width={ENV_W} height={LAYER_H} fill="#eff6ff" rx="0"/>
+        <rect x="0" y={LAYER_Y} width={ENV_W} height={LAYER_H} fill="url(#hatchExt)" opacity="0.35"/>
+        <text x={ENV_W/2} y={LAYER_Y + LAYER_H/2 - 14} textAnchor="middle" fontSize="18" fill="#60a5fa">☀</text>
+        <text x={ENV_W/2} y={LAYER_Y + LAYER_H/2 + 4}  textAnchor="middle" fontSize="9" fontWeight="bold" fill="#3b82f6">EXT.</text>
+        <text x={ENV_W/2} y={LAYER_Y + LAYER_H/2 + 16} textAnchor="middle" fontSize="8" fill="#93c5fd">Exterior</text>
+
+        {/* Interior background */}
+        <rect x={LAYER_X + LAYER_W} y={LAYER_Y} width={ENV_W} height={LAYER_H} fill="#fffbeb" rx="0"/>
+        <rect x={LAYER_X + LAYER_W} y={LAYER_Y} width={ENV_W} height={LAYER_H} fill="url(#hatchInt)" opacity="0.35"/>
+        <text x={LAYER_X + LAYER_W + ENV_W/2} y={LAYER_Y + LAYER_H/2 - 14} textAnchor="middle" fontSize="18" fill="#f59e0b">⌂</text>
+        <text x={LAYER_X + LAYER_W + ENV_W/2} y={LAYER_Y + LAYER_H/2 + 4}  textAnchor="middle" fontSize="9" fontWeight="bold" fill="#d97706">INT.</text>
+        <text x={LAYER_X + LAYER_W + ENV_W/2} y={LAYER_Y + LAYER_H/2 + 16} textAnchor="middle" fontSize="8" fill="#fbbf24">Interior</text>
+
+        {/* ── Capas ── */}
+        {(() => {
+          let xCursor = LAYER_X;
+          return validPairs.map(({ l, i, ld }, vi) => {
+            const w = finalPxs[vi];
+            const x = xCursor;
+            xCursor += w;
+            const [bgColor, txtColor] = matColor(l.mat);
+            const name = abbr(l.mat.n);
+            const hasE = l.mat.lam != null && l.mat.R == null && l.e > 0;
+            const eCm = hasE ? (l.e * 100).toFixed(1) : null;
+            const rVal = ld.r.toFixed(3);
+            const narrow = w < 50;
+            const mid = x + w / 2;
+            const midY = LAYER_Y + LAYER_H / 2;
+
+            return (
+              <g key={i}>
+                <rect x={x} y={LAYER_Y} width={w} height={LAYER_H} fill={bgColor} stroke="#94a3b8" strokeWidth="0.6"/>
+
+                {/* Número de capa arriba */}
+                <text x={mid} y={LAYER_Y + 12} textAnchor="middle" fontSize="8.5" fontWeight="bold" fill="#475569">
+                  {i + 1}
+                </text>
+
+                {/* Nombre (vertical si estrecho, horizontal si ancho) */}
+                {narrow ? (
+                  <text
+                    x={mid} y={midY}
+                    textAnchor="middle" fontSize="8" fill={txtColor}
+                    transform={`rotate(-90,${mid},${midY})`}
+                    style={{ pointerEvents: 'none' }}
+                  >
+                    {name}
+                  </text>
+                ) : (
+                  (() => {
+                    // Dividir nombre en hasta 2 líneas
+                    const words = l.mat.n.split(' ');
+                    let line1 = '', line2 = '';
+                    for (const w2 of words) {
+                      if ((line1 + ' ' + w2).trim().length <= 18) line1 = (line1 + ' ' + w2).trim();
+                      else { line2 = (line2 + ' ' + w2).trim(); }
+                    }
+                    if (line2.length > 18) line2 = line2.slice(0, 17) + '…';
+                    return (
+                      <>
+                        <text x={mid} y={midY - (line2 ? 6 : 0)} textAnchor="middle" fontSize="8.5" fill={txtColor} fontWeight="500">{line1}</text>
+                        {line2 && <text x={mid} y={midY + 10} textAnchor="middle" fontSize="8.5" fill={txtColor} fontWeight="500">{line2}</text>}
+                      </>
+                    );
+                  })()
+                )}
+
+                {/* Espesor y R abajo */}
+                {w >= 36 && (
+                  <text x={mid} y={LAYER_Y + LAYER_H - 8} textAnchor="middle" fontSize="7.5" fill={txtColor} opacity="0.8">
+                    {eCm ? `${eCm} cm` : `R=${rVal}`}
+                  </text>
+                )}
+              </g>
+            );
+          });
+        })()}
+
+        {/* Bordes laterales zona ambiental */}
+        <line x1={LAYER_X} y1={LAYER_Y} x2={LAYER_X} y2={LAYER_Y + LAYER_H} stroke="#94a3b8" strokeWidth="1.2" strokeDasharray="5,3"/>
+        <line x1={LAYER_X + LAYER_W} y1={LAYER_Y} x2={LAYER_X + LAYER_W} y2={LAYER_Y + LAYER_H} stroke="#94a3b8" strokeWidth="1.2" strokeDasharray="5,3"/>
+
+        {/* Flechas de flujo de calor */}
+        <defs>
+          <marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 Z" fill="#f87171"/>
+          </marker>
+        </defs>
+        <line x1={VB_W/2 - 40} y1={LAYER_Y - 14} x2={VB_W/2 + 30} y2={LAYER_Y - 14}
+          stroke="#f87171" strokeWidth="1.2" markerEnd="url(#arr)" strokeDasharray="4,2"/>
+        <text x={VB_W/2 - 50} y={LAYER_Y - 10} fontSize="8" fill="#f87171">flujo de calor →</text>
+
+        {/* Leyenda R total */}
+        <text x={VB_W/2} y={LABEL_Y} textAnchor="middle" fontSize="8" fill="#94a3b8">
+          RT capas = {validPairs.reduce((s, { ld }) => s + ld.r, 0).toFixed(4)} m²K/W
+        </text>
+      </svg>
+    </div>
+  );
+}
+
 function matR(m, e) {
   if (m.R === 0) return 0;
   if (m.R != null) return m.R;
@@ -490,6 +684,8 @@ export default function TransmittanceCalculator({ sharedProject, setSharedProjec
                     <Plus size={13} /> Agregar capa
                   </button>
                 )}
+
+                <LayerDiagram layers={layers} layerData={layerData} elemType={elemType} />
 
                 {canCalc && RT !== null && (
                   <div className="mt-4 grid grid-cols-2 gap-3">
