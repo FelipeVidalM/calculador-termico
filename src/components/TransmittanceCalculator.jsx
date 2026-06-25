@@ -6,8 +6,18 @@ import {
   AlertTriangle, Info
 } from 'lucide-react';
 import {
-  BIBLIOTECA, RSI, RSE, PZ, REGIONES_CHILE, U_MAX_OGUC, ELEM_TYPES
+  BIBLIOTECA, RSI, RSE, PZ, REGIONES_CHILE, COMUNAS_CON_ALTITUD, U_MAX_OGUC, ELEM_TYPES
 } from '../lib/condConstants';
+
+// ── Lógica de zona por altitud (NCh1079 / OGUC) ──────────────────────────────
+const ZONAS_ORD = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'];
+
+function shiftZona(baseZona, msnm) {
+  const shift = msnm < 500 ? 0 : msnm < 1000 ? 1 : msnm < 2000 ? 2 : 3;
+  const idx = ZONAS_ORD.indexOf(baseZona);
+  if (idx < 0 || shift === 0) return baseZona;
+  return ZONAS_ORD[Math.min(idx + shift, ZONAS_ORD.length - 1)];
+}
 
 // ── Correcciones Anexo F NCh853.Of2021 ────────────────────────────────────────
 const AIR_GAP_LEVELS = [
@@ -111,6 +121,8 @@ export default function TransmittanceCalculator({ sharedProject, setSharedProjec
   const [step, setStep] = useState(0);
   const [region, setRegion] = useState('');
   const [provincia, setProvincia] = useState('');
+  const [comuna, setComuna] = useState('');
+  const [altitudMsnm, setAltitudMsnm] = useState('');
   const [elemType, setElemType] = useState('muro');
   const [desc, setDesc] = useState('');
   const [layers, setLayers] = useState([
@@ -127,14 +139,29 @@ export default function TransmittanceCalculator({ sharedProject, setSharedProjec
   const [useInvRoof, setUseInvRoof] = useState(false);
   const [invRoof, setInvRoof] = useState({ p: '', r1: '' });
 
-  // ── Zona térmica ──────────────────────────────────────────────────────────
-  const activeZona = useMemo(() => {
+  // ── Datos derivados de emplazamiento ──────────────────────────────────────
+  const comunas = useMemo(() => {
+    if (!region || !provincia || !REGIONES_CHILE[region]) return [];
+    return REGIONES_CHILE[region].provincias[provincia] || [];
+  }, [region, provincia]);
+
+  const hasAltitudeOption = useMemo(() => COMUNAS_CON_ALTITUD.includes(comuna), [comuna]);
+
+  const baseZona = useMemo(() => {
     if (!provincia) return null;
     for (const [z, provs] of Object.entries(PZ)) {
       if (provs.includes(provincia)) return z;
     }
     return null;
   }, [provincia]);
+
+  const activeZona = useMemo(() => {
+    if (!baseZona) return null;
+    if (!hasAltitudeOption) return baseZona;
+    const msnm = parseFloat(altitudMsnm);
+    if (isNaN(msnm) || msnm < 0) return baseZona;
+    return shiftZona(baseZona, msnm);
+  }, [baseZona, hasAltitudeOption, altitudMsnm]);
 
   // ── Elemento activo ────────────────────────────────────────────────────────
   const activeElem = useMemo(() => ELEM_TYPES.find(e => e.id === elemType) || ELEM_TYPES[0], [elemType]);
@@ -211,6 +238,7 @@ export default function TransmittanceCalculator({ sharedProject, setSharedProjec
     return Object.keys(REGIONES_CHILE[region].provincias);
   }, [region]);
 
+
   const canCalc = layerData.length > 0 && layerData.every(l => l.ok);
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -267,7 +295,7 @@ export default function TransmittanceCalculator({ sharedProject, setSharedProjec
                     <select
                       className="w-full text-xs border border-black/10 rounded-xl px-3 py-2.5 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                       value={region}
-                      onChange={e => { setRegion(e.target.value); setProvincia(''); }}
+                      onChange={e => { setRegion(e.target.value); setProvincia(''); setComuna(''); setAltitudMsnm(''); }}
                     >
                       <option value="">— Seleccione región —</option>
                       {Object.keys(REGIONES_CHILE).map(r => <option key={r} value={r}>{r}</option>)}
@@ -278,18 +306,67 @@ export default function TransmittanceCalculator({ sharedProject, setSharedProjec
                     <select
                       className="w-full text-xs border border-black/10 rounded-xl px-3 py-2.5 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                       value={provincia}
-                      onChange={e => setProvincia(e.target.value)}
+                      onChange={e => { setProvincia(e.target.value); setComuna(''); setAltitudMsnm(''); }}
                       disabled={!region}
                     >
                       <option value="">— Seleccione provincia —</option>
                       {provincias.map(p => <option key={p} value={p}>{p}</option>)}
                     </select>
                   </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Comuna</label>
+                    <select
+                      className="w-full text-xs border border-black/10 rounded-xl px-3 py-2.5 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                      value={comuna}
+                      onChange={e => { setComuna(e.target.value); setAltitudMsnm(''); }}
+                      disabled={!provincia}
+                    >
+                      <option value="">— Seleccione comuna —</option>
+                      {comunas.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+
+                  {hasAltitudeOption && (
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                        Altitud del emplazamiento
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          min="0"
+                          step="10"
+                          placeholder="0"
+                          className="flex-1 text-xs border border-black/10 rounded-xl px-3 py-2.5 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                          value={altitudMsnm}
+                          onChange={e => setAltitudMsnm(e.target.value)}
+                        />
+                        <span className="text-xs text-slate-500 shrink-0">m s.n.m.</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 mt-1">
+                        {!altitudMsnm ? 'Ingrese la altitud para verificar corrección de zona' :
+                         parseFloat(altitudMsnm) < 500  ? '< 500 m — sin corrección de zona' :
+                         parseFloat(altitudMsnm) < 1000 ? '500–1000 m — +1 zona (precordillera)' :
+                         parseFloat(altitudMsnm) < 2000 ? '1000–2000 m — +2 zonas (cordillera)' :
+                                                          '> 2000 m — +3 zonas (alta cordillera)'}
+                      </p>
+                    </div>
+                  )}
                 </div>
+
                 {activeZona && (
-                  <div className="mt-3 px-4 py-2.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2">
-                    <MapPin size={14} className="text-emerald-700 shrink-0" />
-                    <p className="text-xs font-bold text-emerald-800">Zona Térmica <span className="text-lg">{activeZona}</span> — según NCh1079 / OGUC</p>
+                  <div className="mt-3 px-4 py-2.5 bg-emerald-50 border border-emerald-200 rounded-xl">
+                    <div className="flex items-center gap-2">
+                      <MapPin size={14} className="text-emerald-700 shrink-0" />
+                      <p className="text-xs font-bold text-emerald-800">
+                        Zona Térmica <span className="text-lg">{activeZona}</span> — NCh1079 / OGUC Art.4.1.10
+                      </p>
+                    </div>
+                    {hasAltitudeOption && baseZona && activeZona !== baseZona && (
+                      <p className="text-[10px] text-emerald-600 mt-1 ml-5">
+                        Zona base provincia: {baseZona} → corregida por altitud ({altitudMsnm} m s.n.m.) → Zona {activeZona}
+                      </p>
+                    )}
                   </div>
                 )}
               </SectionCard>
